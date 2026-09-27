@@ -24,8 +24,13 @@ Future<void> main() async {
 
 void _registerFontLicenses() {
   LicenseRegistry.addLicense(() async* {
-    for (final (font, file) in [('Amiri', 'OFL-Amiri.txt'), ('Noto Nastaliq Urdu', 'OFL-NotoNastaliqUrdu.txt')]) {
-      yield LicenseEntryWithLineBreaks([font], await rootBundle.loadString('assets/fonts/$file'));
+    for (final (font, file) in [
+      ('Amiri', 'OFL-Amiri.txt'),
+      ('Noto Nastaliq Urdu', 'OFL-NotoNastaliqUrdu.txt'),
+    ]) {
+      yield LicenseEntryWithLineBreaks([
+        font,
+      ], await rootBundle.loadString('assets/fonts/$file'));
     }
   });
 }
@@ -49,7 +54,10 @@ class _MuallimAppState extends State<MuallimApp> {
     super.initState();
     // Answers are saved on a short debounce; make sure nothing is lost if the
     // app is backgrounded or closed mid-typing.
-    _lifecycle = AppLifecycleListener(onHide: _answers.flush, onDetach: _answers.flush);
+    _lifecycle = AppLifecycleListener(
+      onHide: _answers.flush,
+      onDetach: _answers.flush,
+    );
   }
 
   @override
@@ -68,17 +76,26 @@ class _MuallimAppState extends State<MuallimApp> {
         BlocProvider.value(value: _answers),
       ],
       child: BlocBuilder<SettingsCubit, ReaderSettings>(
-        buildWhen: (a, b) => a.theme != b.theme || a.fontScale != b.fontScale || a.language != b.language,
+        buildWhen: (a, b) =>
+            a.theme != b.theme ||
+            a.fontScale != b.fontScale ||
+            a.language != b.language,
         builder: (context, settings) => MaterialApp(
           onGenerateTitle: (context) => context.l10n.appTitle,
           debugShowCheckedModeBanner: false,
           theme: buildAppTheme(settings),
           // Only the interface follows this locale; book content is always
           // rendered in its own Urdu/Arabic, right-to-left.
-          locale: settings.language.code == null ? null : Locale(settings.language.code!),
+          locale: settings.language.code == null
+              ? null
+              : Locale(settings.language.code!),
           // Urdu first so unsupported device languages fall back to Urdu.
           supportedLocales: AppLocalizations.supportedLocales.toList()
-            ..sort((a, b) => a.languageCode == 'ur' ? -1 : (b.languageCode == 'ur' ? 1 : 0)),
+            ..sort(
+              (a, b) => a.languageCode == 'ur'
+                  ? -1
+                  : (b.languageCode == 'ur' ? 1 : 0),
+            ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           builder: (context, child) => Theme(
             data: withUiFont(Theme.of(context), urdu: context.isUrduUi),

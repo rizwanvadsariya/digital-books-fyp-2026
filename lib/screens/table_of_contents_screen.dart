@@ -29,7 +29,11 @@ class TableOfContentsScreen extends StatelessWidget {
 /// Unit → lesson → page navigation generated from every page's unit/lesson
 /// fields, plus the book's own printed contents page.
 class TableOfContentsView extends StatefulWidget {
-  const TableOfContentsView({super.key, required this.onOpen, this.currentIndex});
+  const TableOfContentsView({
+    super.key,
+    required this.onOpen,
+    this.currentIndex,
+  });
 
   final ValueChanged<int> onOpen;
   final int? currentIndex;
@@ -46,7 +50,11 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
   void _scrollTo(String id) {
     final ctx = _sectionKeys[id]?.currentContext;
     if (ctx != null) {
-      Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 350), curve: Curves.easeOut);
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -55,10 +63,16 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
     final book = context.read<BookCubit>().state.book!;
     final bookTheme = BookTheme.of(context);
     final l = context.l10n;
-    final frontMatter = [for (final p in book.pages) if (p.unit == null && p.pageKind == null) p];
+    final frontMatter = [
+      for (final p in book.pages)
+        if (p.unit == null && p.pageKind == null) p,
+    ];
     final extras = [
       for (final p in book.pages)
-        if (p.pageKind != null && p.pageKind != 'unit_cover' && p.pageKind != 'pre_lesson') p,
+        if (p.pageKind != null &&
+            p.pageKind != 'unit_cover' &&
+            p.pageKind != 'pre_lesson')
+          p,
     ];
     final printedToc = book.firstPageOfKind('table_of_contents');
 
@@ -71,18 +85,21 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
 
     return Column(
       children: [
-        SizedBox(
-          height: 56,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            children: [
-              for (final (id, label) in chips)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 8),
-                  child: ActionChip(label: Text(label), onPressed: () => _scrollTo(id)),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: List.generate(chips.length, (index) {
+              final (id, label) = chips[index];
+              return Padding(
+                padding: const EdgeInsetsDirectional.only(end: 8),
+                child: ActionChip(
+                  labelPadding: const EdgeInsets.symmetric(horizontal: 1),
+                  label: Text(label),
+                  onPressed: () => _scrollTo(id),
                 ),
-            ],
+              );
+            }),
           ),
         ),
         const Divider(height: 1),
@@ -109,9 +126,11 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
                   for (final lesson in unit.lessons)
                     _LessonTile(
                       lesson: lesson,
-                      selected: widget.currentIndex != null &&
+                      selected:
+                          widget.currentIndex != null &&
                           widget.currentIndex! >= lesson.firstPageIndex &&
-                          widget.currentIndex! < lesson.firstPageIndex + lesson.pageCount,
+                          widget.currentIndex! <
+                              lesson.firstPageIndex + lesson.pageCount,
                       onTap: () => widget.onOpen(lesson.firstPageIndex),
                     ),
                 ],
@@ -131,7 +150,9 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
                       leading: row.$2,
                       printedPage: row.$3,
                       onTap: () {
-                        final i = row.$3 == null ? null : book.indexForPrintedPage(row.$3!);
+                        final i = row.$3 == null
+                            ? null
+                            : book.indexForPrintedPage(row.$3!);
                         if (i != null) widget.onOpen(i);
                       },
                     ),
@@ -155,7 +176,13 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
   static String? _pageTitle(BookPage p) {
     for (final b in p.blocks) {
       if (b is TextBlock &&
-          const {'title', 'section_heading', 'heading', 'book_title', 'subheading'}.contains(b.type)) {
+          const {
+            'title',
+            'section_heading',
+            'heading',
+            'book_title',
+            'subheading',
+          }.contains(b.type)) {
         return b.text;
       }
     }
@@ -164,10 +191,10 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
 
   /// (topic, lesson, printed page) rows from the printed contents tables.
   static List<(String, String?, String?)> _printedRows(BookPage page) => [
-        for (final b in page.blocks)
-          if (b is TableBlock && b.keys.contains('موضوع'))
-            for (final r in b.rows) (r['موضوع'] ?? '', r['سبق'], r['صفحہ']),
-      ];
+    for (final b in page.blocks)
+      if (b is TableBlock && b.keys.contains('موضوع'))
+        for (final r in b.rows) (r['موضوع'] ?? '', r['سبق'], r['صفحہ']),
+  ];
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -180,7 +207,11 @@ class _SectionHeader extends StatelessWidget {
     final book = BookTheme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
-      child: Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: book.red, fontWeight: FontWeight.bold)),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium
+            ?.copyWith(color: book.red, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
@@ -208,15 +239,28 @@ class _UnitHeader extends StatelessWidget {
               children: [
                 Text(
                   context.l10n.unitN('${unit.unit}'),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 if (unit.title != null)
-                  Expanded(child: ScriptText(unit.title!, size: 14, color: Colors.white.withValues(alpha: 0.9)))
+                  Expanded(
+                    child: ScriptText(
+                      unit.title!,
+                      size: 14,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  )
                 else
                   const Spacer(),
                 const SizedBox(width: 12),
-                Text(context.l10n.lessonsCount(unit.lessons.length), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text(
+                  context.l10n.lessonsCount(unit.lessons.length),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -227,7 +271,11 @@ class _UnitHeader extends StatelessWidget {
 }
 
 class _LessonTile extends StatelessWidget {
-  const _LessonTile({required this.lesson, required this.selected, required this.onTap});
+  const _LessonTile({
+    required this.lesson,
+    required this.selected,
+    required this.onTap,
+  });
 
   final LessonEntry lesson;
   final bool selected;
@@ -245,13 +293,24 @@ class _LessonTile extends StatelessWidget {
         backgroundColor: selected ? book.red : book.badgeBg,
         child: Text(
           lesson.lessonLabel,
-          style: TextStyle(color: selected ? Colors.white : book.badgeFg, fontSize: lesson.lessonLabel.length > 2 ? 10 : 13),
+          style: TextStyle(
+            color: selected ? Colors.white : book.badgeFg,
+            fontSize: lesson.lessonLabel.length > 2 ? 10 : 13,
+          ),
         ),
       ),
-      title: lesson.title != null ? ScriptText(lesson.title!, size: 14) : Text(l.lessonN(lesson.lessonLabel)),
-      subtitle: Text(l.pagesCount(lesson.pageCount), style: TextStyle(color: book.muted, fontSize: 11)),
+      title: lesson.title != null
+          ? ScriptText(lesson.title!, size: 14)
+          : Text(l.lessonN(lesson.lessonLabel)),
+      subtitle: Text(
+        l.pagesCount(lesson.pageCount),
+        style: TextStyle(color: book.muted, fontSize: 11),
+      ),
       trailing: lesson.printedPage != null
-          ? Text(l.pageShort(lesson.printedPage!), style: TextStyle(color: book.muted))
+          ? Text(
+              l.pageShort(lesson.printedPage!),
+              style: TextStyle(color: book.muted),
+            )
           : null,
     );
   }
@@ -280,10 +339,22 @@ class _PageTile extends StatelessWidget {
       selected: selected,
       onTap: onTap,
       leading: leading != null
-          ? SizedBox(width: 36, child: Text(leading!, textAlign: TextAlign.center, style: TextStyle(color: book.red)))
+          ? SizedBox(
+              width: 36,
+              child: Text(
+                leading!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: book.red),
+              ),
+            )
           : Icon(Icons.description_outlined, color: book.muted, size: 20),
       title: ScriptText(title, size: 13.5),
-      trailing: printedPage != null ? Text(context.l10n.pageShort(printedPage!), style: TextStyle(color: book.muted)) : null,
+      trailing: printedPage != null
+          ? Text(
+              context.l10n.pageShort(printedPage!),
+              style: TextStyle(color: book.muted),
+            )
+          : null,
     );
   }
 }

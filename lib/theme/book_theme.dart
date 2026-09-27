@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../models/reader_settings.dart';
@@ -109,33 +108,47 @@ class BookTheme extends ThemeExtension<BookTheme> {
       Theme.of(context).extension<BookTheme>() ?? paperTheme;
 
   /// Quranic / vocalised Arabic. Amiri renders stacked harakat correctly.
-  TextStyle arabic({double size = 22, bool bold = false, Color? color, double height = 1.9}) => TextStyle(
-        fontFamily: arabicFont,
-        fontFamilyFallback: const [urduFont],
-        fontSize: size * fontScale,
-        fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-        color: color ?? ink,
-        height: height,
-      );
+  TextStyle arabic({
+    double size = 22,
+    bool bold = false,
+    Color? color,
+    double height = 1.9,
+  }) => TextStyle(
+    fontFamily: arabicFont,
+    fontFamilyFallback: const [urduFont],
+    fontSize: size * fontScale,
+    fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+    color: color ?? ink,
+    height: height,
+  );
 
   /// Urdu prose in Nastaliq. The font is variable, so weight is set through
   /// the `wght` axis as well as [FontWeight].
-  TextStyle urdu({double size = 15, bool bold = false, Color? color, double height = 2.15}) => TextStyle(
-        fontFamily: urduFont,
-        fontFamilyFallback: const [arabicFont],
-        fontSize: size * fontScale,
-        fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-        fontVariations: [FontVariation('wght', bold ? 700 : 400)],
-        color: color ?? ink,
-        height: height,
-      );
+  TextStyle urdu({
+    double size = 15,
+    bool bold = false,
+    Color? color,
+    double height = 2.15,
+  }) => TextStyle(
+    fontFamily: urduFont,
+    fontFamilyFallback: const [arabicFont],
+    fontSize: size * fontScale,
+    fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+    fontVariations: [FontVariation('wght', bold ? 700 : 400)],
+    color: color ?? ink,
+    height: height,
+  );
 
   /// Arabic runs are set larger than Urdu runs of the same "size" because
   /// Naskh reads smaller than Nastaliq at equal point size.
-  TextStyle forScript(Script script, {double size = 15, bool bold = false, Color? color}) =>
-      script == Script.arabic
-          ? arabic(size: size * arabicScale, bold: bold, color: color)
-          : urdu(size: size, bold: bold, color: color);
+  TextStyle forScript(
+    Script script, {
+    double size = 15,
+    bool bold = false,
+    Color? color,
+  }) => script == Script.arabic
+      ? arabic(size: size * arabicScale, bold: bold, color: color)
+      : urdu(size: size, bold: bold, color: color);
 
   static const arabicScale = 1.3;
 
@@ -156,24 +169,23 @@ class BookTheme extends ThemeExtension<BookTheme> {
     Color? incorrect,
     Color? fieldLine,
     double? fontScale,
-  }) =>
-      BookTheme(
-        paper: paper ?? this.paper,
-        paperShade: paperShade ?? this.paperShade,
-        ink: ink ?? this.ink,
-        muted: muted ?? this.muted,
-        red: red ?? this.red,
-        border: border ?? this.border,
-        verseTint: verseTint ?? this.verseTint,
-        boxTint: boxTint ?? this.boxTint,
-        accent: accent ?? this.accent,
-        badgeBg: badgeBg ?? this.badgeBg,
-        badgeFg: badgeFg ?? this.badgeFg,
-        correct: correct ?? this.correct,
-        incorrect: incorrect ?? this.incorrect,
-        fieldLine: fieldLine ?? this.fieldLine,
-        fontScale: fontScale ?? this.fontScale,
-      );
+  }) => BookTheme(
+    paper: paper ?? this.paper,
+    paperShade: paperShade ?? this.paperShade,
+    ink: ink ?? this.ink,
+    muted: muted ?? this.muted,
+    red: red ?? this.red,
+    border: border ?? this.border,
+    verseTint: verseTint ?? this.verseTint,
+    boxTint: boxTint ?? this.boxTint,
+    accent: accent ?? this.accent,
+    badgeBg: badgeBg ?? this.badgeBg,
+    badgeFg: badgeFg ?? this.badgeFg,
+    correct: correct ?? this.correct,
+    incorrect: incorrect ?? this.incorrect,
+    fieldLine: fieldLine ?? this.fieldLine,
+    fontScale: fontScale ?? this.fontScale,
+  );
 
   @override
   BookTheme lerp(BookTheme? other, double t) {
@@ -228,7 +240,10 @@ ThemeData withUiFont(ThemeData theme, {required bool urdu}) {
   TextTheme apply(TextTheme t) => urdu
       ? t.apply(fontFamily: urduFont, fontFamilyFallback: const [arabicFont])
       : t.apply(fontFamilyFallback: const [urduFont, arabicFont]);
-  return theme.copyWith(textTheme: apply(theme.textTheme), primaryTextTheme: apply(theme.primaryTextTheme));
+  return theme.copyWith(
+    textTheme: apply(theme.textTheme),
+    primaryTextTheme: apply(theme.primaryTextTheme),
+  );
 }
 
 /// Style for interface text shown on a book page (hints, labels), in the
