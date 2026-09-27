@@ -163,7 +163,8 @@ class _AnswerFieldState extends State<AnswerField> {
                         hintStyle: uiTextStyle(
                           context,
                           color: book.muted.withValues(alpha: 0.7),
-                        ),
+                        ).copyWith(overflow: TextOverflow.ellipsis),
+                        hintMaxLines: 1,
                         contentPadding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
                         filled: active,
                         fillColor: book.accent.withValues(alpha: 0.08),
