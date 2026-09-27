@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/book_cubit.dart';
+import '../l10n/l10n.dart';
 import '../theme/book_theme.dart';
 import 'home_shell.dart';
 
@@ -34,14 +35,14 @@ class SplashScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 if (state.status == BookStatus.failure) ...[
                   Text(
-                    'کتاب لوڈ نہیں ہو سکی\n${state.error ?? ''}',
+                    '${context.l10n.loadFailed}\n${state.error ?? ''}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.white70),
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
                     onPressed: () => context.read<BookCubit>().load(),
-                    child: const Text('دوبارہ کوشش کریں'),
+                    child: Text(context.l10n.retry),
                   ),
                 ] else
                   const SizedBox(

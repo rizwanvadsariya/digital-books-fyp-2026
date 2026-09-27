@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/book_cubit.dart';
 import '../blocs/progress_cubit.dart';
+import '../l10n/l10n.dart';
 import '../models/content_block.dart';
 import '../theme/book_theme.dart';
 import '../widgets/common/script_text.dart';
@@ -16,6 +17,7 @@ class BookmarksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final book = context.read<BookCubit>().state.book!;
     final theme = BookTheme.of(context);
+    final l = context.l10n;
     final bookmarks = context.select<ProgressCubit, List<int>>((c) => c.state.bookmarks.toList()..sort());
 
     if (bookmarks.isEmpty) {
@@ -27,10 +29,10 @@ class BookmarksScreen extends StatelessWidget {
             children: [
               Icon(Icons.bookmark_border, size: 56, color: theme.muted),
               const SizedBox(height: 12),
-              const Text('ابھی کوئی بک مارک نہیں', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(l.noBookmarksTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text(
-                'کسی صفحے پر اوپر بک مارک کا نشان دبائیں',
+                l.noBookmarksHint,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: theme.muted),
               ),
@@ -52,9 +54,9 @@ class BookmarksScreen extends StatelessWidget {
           onDismissed: (_) => context.read<ProgressCubit>().toggleBookmark(page.index),
           child: ListTile(
             leading: Icon(Icons.bookmark, color: theme.red),
-            title: ScriptText(book.locationLabel(page), size: 14, bold: true),
+            title: Text(pageLocation(l, page), style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: heading != null ? ScriptText(heading.text, size: 12, color: theme.muted) : null,
-            trailing: Text(page.printedPage != null ? 'ص ${page.printedPage}' : '${page.index + 1}'),
+            trailing: Text(l.pageShort(page.printedPage ?? '${page.index + 1}')),
             onTap: () => onOpen(page.index),
           ),
         );

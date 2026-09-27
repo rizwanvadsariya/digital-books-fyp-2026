@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/answers_cubit.dart';
 import '../../blocs/settings_cubit.dart';
+import '../../l10n/l10n.dart';
 import '../../models/content_block.dart';
 import '../../theme/book_theme.dart';
 import '../../utils/arabic_text.dart';
@@ -89,7 +90,7 @@ class VerseTranslateBlockView extends StatelessWidget {
                   AnswerField(
                     id: answerId(pdfPage, blockIndex, i),
                     answerKey: block.items[i].translation,
-                    hint: 'ترجمہ',
+                    hint: context.l10n.hintTranslation,
                   ),
               ],
             ),
@@ -109,14 +110,14 @@ class RecitationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
     return IconButton(
-      tooltip: 'تلاوت سنیں',
+      tooltip: context.l10n.listenRecitation,
       visualDensity: VisualDensity.compact,
       icon: Icon(Icons.play_circle_outline, color: book.accent),
       onPressed: () => ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(
-          content: Text('تلاوت کی آڈیو جلد شامل کی جائے گی۔', textDirection: TextDirection.rtl),
-          duration: Duration(seconds: 2),
+        ..showSnackBar(SnackBar(
+          content: Text(context.l10n.recitationComingSoon),
+          duration: const Duration(seconds: 2),
         )),
     );
   }

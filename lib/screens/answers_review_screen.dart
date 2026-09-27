@@ -5,6 +5,7 @@ import '../blocs/answers_cubit.dart';
 import '../blocs/book_cubit.dart';
 import '../blocs/settings_cubit.dart';
 import '../data/exercise_lookup.dart';
+import '../l10n/l10n.dart';
 import '../theme/book_theme.dart';
 import '../utils/arabic_text.dart';
 import '../widgets/common/script_text.dart';
@@ -20,6 +21,7 @@ class AnswersReviewScreen extends StatelessWidget {
     final answers = context.select<AnswersCubit, Map<String, String>>((c) => c.state.answers);
     final strict = context.select<SettingsCubit, bool>((c) => c.state.strictMatching);
     final theme = BookTheme.of(context);
+    final l = context.l10n;
 
     final byPage = <int, List<(String, String, ExerciseInfo)>>{};
     for (final e in answers.entries) {
@@ -31,11 +33,11 @@ class AnswersReviewScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('میرے جوابات (${answers.length})'),
+        title: Text(l.myAnswersCount(answers.length)),
         actions: [
           if (answers.isNotEmpty)
             IconButton(
-              tooltip: 'سب جوابات مٹائیں',
+              tooltip: l.deleteAllAnswers,
               icon: const Icon(Icons.delete_sweep_outlined),
               onPressed: () => _confirmClear(context),
             ),
@@ -43,7 +45,7 @@ class AnswersReviewScreen extends StatelessWidget {
       ),
       body: pages.isEmpty
           ? Center(
-              child: Text('ابھی کوئی جواب محفوظ نہیں ہوا', style: TextStyle(color: theme.muted)),
+              child: Text(l.noAnswersYet, style: TextStyle(color: theme.muted)),
             )
           : ListView.builder(
               padding: const EdgeInsets.only(bottom: 24),
@@ -59,10 +61,10 @@ class AnswersReviewScreen extends StatelessWidget {
                     children: [
                       ListTile(
                         tileColor: theme.red.withValues(alpha: 0.08),
-                        title: ScriptText(book.locationLabel(page), size: 14, bold: true),
+                        title: Text(pageLocation(l, page), style: const TextStyle(fontWeight: FontWeight.bold)),
                         trailing: TextButton.icon(
                           icon: const Icon(Icons.open_in_new, size: 16),
-                          label: Text(page.printedPage != null ? 'ص ${page.printedPage}' : 'کھولیں'),
+                          label: Text(page.printedPage != null ? l.pageShort(page.printedPage!) : l.open),
                           onPressed: () => openReader(context, page.index),
                         ),
                       ),
@@ -77,14 +79,15 @@ class AnswersReviewScreen extends StatelessWidget {
   }
 
   Future<void> _confirmClear(BuildContext context) async {
+    final l = context.l10n;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('سب جوابات مٹائیں؟'),
-        content: const Text('یہ عمل واپس نہیں ہو سکتا۔'),
+        title: Text(l.deleteAllAnswersQuestion),
+        content: Text(l.cannotBeUndone),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('نہیں')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('مٹائیں')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.delete)),
         ],
       ),
     );
@@ -111,7 +114,11 @@ class _AnswerRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ScriptText(answer, size: 13.5, color: theme.accent),
-          if (correct == false) ScriptText('درست: $key', size: 12, color: theme.correct),
+          if (correct == false)
+            Text.rich(TextSpan(children: [
+              TextSpan(text: context.l10n.correctAnswerLabel, style: TextStyle(fontSize: 12, color: theme.muted)),
+              WidgetSpan(child: ScriptText(key!, size: 12, color: theme.correct)),
+            ])),
         ],
       ),
       trailing: switch (correct) {

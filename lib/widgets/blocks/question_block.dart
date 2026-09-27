@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../blocs/answers_cubit.dart';
+import '../../l10n/l10n.dart';
 import '../../models/content_block.dart';
 import '../../theme/book_theme.dart';
 import '../../utils/arabic_text.dart';
@@ -99,7 +100,7 @@ class _VerseExercise extends StatelessWidget {
               Expanded(child: ScriptText(verse, size: 16, forceScript: Script.arabic)),
             ],
           ),
-          AnswerField(id: id, language: KeyboardLanguage.arabic, hint: 'مطلوبہ حصہ یہاں لکھیں'),
+          AnswerField(id: id, language: KeyboardLanguage.arabic, hint: context.l10n.hintIdentifyPart),
         ],
       ),
     );

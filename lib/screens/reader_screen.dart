@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/book_cubit.dart';
 import '../blocs/progress_cubit.dart';
+import '../l10n/l10n.dart';
 import '../models/book.dart';
 import '../widgets/book_flip_view.dart';
 import '../widgets/book_page.dart';
-import '../widgets/common/script_text.dart';
 import '../widgets/keyboard/arabic_keyboard.dart';
 import '../widgets/keyboard/keyboard_cubit.dart';
 import '../widgets/reader_navigation.dart';
@@ -86,6 +86,7 @@ class _ReaderState extends State<_Reader> {
   @override
   Widget build(BuildContext context) {
     final page = book.pages[_index];
+    final l = context.l10n;
     final bookmarked = context.select<ProgressCubit, bool>((c) => c.state.isBookmarked(_index));
     final keyboardVisible = context.select<KeyboardCubit, bool>((c) => c.state.customVisible);
 
@@ -96,16 +97,16 @@ class _ReaderState extends State<_Reader> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: ScriptText(book.locationLabel(page), size: 15, bold: true),
+          title: FittedBox(fit: BoxFit.scaleDown, child: Text(pageLocation(l, page))),
           actions: [
             IconButton(
-              tooltip: bookmarked ? 'بک مارک ہٹائیں' : 'بک مارک لگائیں',
+              tooltip: bookmarked ? l.removeBookmark : l.addBookmark,
               icon: Icon(bookmarked ? Icons.bookmark : Icons.bookmark_border),
               onPressed: () => context.read<ProgressCubit>().toggleBookmark(_index),
             ),
-            IconButton(tooltip: 'فہرست', icon: const Icon(Icons.toc), onPressed: _openContents),
+            IconButton(tooltip: l.navContents, icon: const Icon(Icons.toc), onPressed: _openContents),
             IconButton(
-              tooltip: 'پڑھنے کی ترتیبات',
+              tooltip: l.readingSettings,
               icon: const Icon(Icons.text_fields),
               onPressed: () => showReadingSettings(context),
             ),
@@ -157,7 +158,12 @@ class _PageScrubberState extends State<_PageScrubber> {
   @override
   Widget build(BuildContext context) {
     final value = _dragValue ?? widget.index.toDouble();
-    return SafeArea(
+    final l = context.l10n;
+    // Always right-to-left, whatever the interface language: the scrubber
+    // mirrors the book's own page order.
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: SafeArea(
       top: false,
       child: SizedBox(
         height: 52,
@@ -165,7 +171,7 @@ class _PageScrubberState extends State<_PageScrubber> {
           children: [
             // In RTL the start (right) side points back toward earlier pages.
             IconButton(
-              tooltip: 'پچھلا صفحہ',
+              tooltip: l.previousPage,
               icon: const Icon(Icons.arrow_back),
               onPressed: widget.index > 0 ? () => widget.onChanged(widget.index - 1) : null,
             ),
@@ -175,7 +181,7 @@ class _PageScrubberState extends State<_PageScrubber> {
                 min: 0,
                 max: (widget.total - 1).toDouble(),
                 divisions: widget.total - 1,
-                label: 'صفحہ ${value.round() + 1}',
+                label: l.pageN('${value.round() + 1}'),
                 onChanged: (v) => setState(() => _dragValue = v),
                 onChangeEnd: (v) {
                   setState(() => _dragValue = null);
@@ -185,12 +191,13 @@ class _PageScrubberState extends State<_PageScrubber> {
             ),
             Text('${widget.index + 1}/${widget.total}', style: Theme.of(context).textTheme.labelMedium),
             IconButton(
-              tooltip: 'اگلا صفحہ',
+              tooltip: l.nextPage,
               icon: const Icon(Icons.arrow_forward),
               onPressed: widget.index < widget.total - 1 ? () => widget.onChanged(widget.index + 1) : null,
             ),
           ],
         ),
+      ),
       ),
     );
   }

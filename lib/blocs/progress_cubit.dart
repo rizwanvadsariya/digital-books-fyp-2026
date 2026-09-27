@@ -39,4 +39,9 @@ class ProgressCubit extends Cubit<ProgressState> {
     emit(ProgressState(lastPageIndex: state.lastPageIndex, bookmarks: next));
     _store.writeBookmarks(next);
   }
+
+  void clearBookmarks() {
+    emit(ProgressState(lastPageIndex: state.lastPageIndex));
+    _store.writeBookmarks(const {});
+  }
 }

@@ -35,6 +35,18 @@ class ScriptText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = BookTheme.of(context);
+    if (forceScript == null && !_hasArabicScript(text)) {
+      // e.g. an English interface label: use the platform font, not Nastaliq.
+      return Text(
+        text,
+        textAlign: align,
+        style: TextStyle(
+          fontSize: size * theme.fontScale,
+          fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+          color: color ?? theme.ink,
+        ),
+      );
+    }
     if (forceScript != null) {
       return Text(
         text,
@@ -68,3 +80,5 @@ class ScriptText extends StatelessWidget {
     );
   }
 }
+
+bool _hasArabicScript(String text) => text.runes.any((r) => r >= 0x0600 && r <= 0x06FF || r >= 0x0750 && r <= 0x077F || r >= 0xFB50 && r <= 0xFEFF);

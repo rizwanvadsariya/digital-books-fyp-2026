@@ -18,6 +18,8 @@ class SettingsCubit extends Cubit<ReaderSettings> {
 
   void setPracticeMode(bool on) => _update(state.copyWith(practiceMode: on));
 
+  void setLanguage(AppLanguage language) => _update(state.copyWith(language: language));
+
   void _update(ReaderSettings next) {
     emit(next);
     _store.writeSettings(next);

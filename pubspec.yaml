@@ -55,6 +55,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -63,6 +64,8 @@ flutter:
 
   assets:
     - assets/data/muallim_ul_quran_vol1_full.json
+    - assets/fonts/OFL-Amiri.txt
+    - assets/fonts/OFL-NotoNastaliqUrdu.txt
 
   fonts:
     - family: Amiri

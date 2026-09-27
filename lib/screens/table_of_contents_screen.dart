@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/book_cubit.dart';
+import '../l10n/l10n.dart';
 import '../models/book.dart';
 import '../models/content_block.dart';
 import '../theme/book_theme.dart';
@@ -16,7 +17,7 @@ class TableOfContentsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('فہرست')),
+      appBar: AppBar(title: Text(context.l10n.navContents)),
       body: TableOfContentsView(
         currentIndex: currentIndex,
         onOpen: (i) => Navigator.of(context).pop(i),
@@ -53,6 +54,7 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
   Widget build(BuildContext context) {
     final book = context.read<BookCubit>().state.book!;
     final bookTheme = BookTheme.of(context);
+    final l = context.l10n;
     final frontMatter = [for (final p in book.pages) if (p.unit == null && p.pageKind == null) p];
     final extras = [
       for (final p in book.pages)
@@ -61,10 +63,10 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
     final printedToc = book.firstPageOfKind('table_of_contents');
 
     final chips = <(String, String)>[
-      ('front', 'مقدمہ'),
-      for (final u in book.units) ('unit${u.unit}', 'یونٹ ${u.unit}'),
-      ('extra', 'امتحان و فہرست'),
-      if (printedToc != null) ('printed', 'کتاب کی فہرست'),
+      ('front', l.chipFront),
+      for (final u in book.units) ('unit${u.unit}', l.unitN('${u.unit}')),
+      ('extra', l.chipExtra),
+      if (printedToc != null) ('printed', l.chipPrinted),
     ];
 
     return Column(
@@ -90,10 +92,10 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _SectionHeader(key: _key('front'), title: 'مقدمہ اور تعارف'),
+                _SectionHeader(key: _key('front'), title: l.sectionFront),
                 for (final p in frontMatter)
                   _PageTile(
-                    title: _pageTitle(p) ?? 'صفحہ ${p.index + 1}',
+                    title: _pageTitle(p) ?? l.pageN('${p.index + 1}'),
                     printedPage: p.printedPage,
                     selected: widget.currentIndex == p.index,
                     onTap: () => widget.onOpen(p.index),
@@ -113,16 +115,16 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
                       onTap: () => widget.onOpen(lesson.firstPageIndex),
                     ),
                 ],
-                _SectionHeader(key: _key('extra'), title: 'امتحان اور ضمیمہ'),
+                _SectionHeader(key: _key('extra'), title: l.sectionExtra),
                 for (final p in extras)
                   _PageTile(
-                    title: book.locationLabel(p),
+                    title: pageLocation(l, p),
                     printedPage: p.printedPage,
                     selected: widget.currentIndex == p.index,
                     onTap: () => widget.onOpen(p.index),
                   ),
                 if (printedToc != null) ...[
-                  _SectionHeader(key: _key('printed'), title: 'کتاب کی اصل فہرست'),
+                  _SectionHeader(key: _key('printed'), title: l.sectionPrinted),
                   for (final row in _printedRows(printedToc))
                     _PageTile(
                       title: row.$1,
@@ -137,7 +139,7 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'کُل ${book.length} صفحات',
+                    l.totalPages(book.length),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: bookTheme.muted),
                   ),
@@ -178,7 +180,7 @@ class _SectionHeader extends StatelessWidget {
     final book = BookTheme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
-      child: ScriptText(title, size: 16, bold: true, color: book.red),
+      child: Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: book.red, fontWeight: FontWeight.bold)),
     );
   }
 }
@@ -204,13 +206,17 @@ class _UnitHeader extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: Row(
               children: [
-                ScriptText('یونٹ ${unit.unit}', size: 16, bold: true, color: Colors.white),
+                Text(
+                  context.l10n.unitN('${unit.unit}'),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
                 const SizedBox(width: 12),
                 if (unit.title != null)
                   Expanded(child: ScriptText(unit.title!, size: 14, color: Colors.white.withValues(alpha: 0.9)))
                 else
                   const Spacer(),
-                Text('${unit.lessons.length} اسباق', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                const SizedBox(width: 12),
+                Text(context.l10n.lessonsCount(unit.lessons.length), style: const TextStyle(color: Colors.white70, fontSize: 12)),
               ],
             ),
           ),
@@ -230,6 +236,7 @@ class _LessonTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
+    final l = context.l10n;
     return ListTile(
       selected: selected,
       onTap: onTap,
@@ -241,10 +248,10 @@ class _LessonTile extends StatelessWidget {
           style: TextStyle(color: selected ? Colors.white : book.badgeFg, fontSize: lesson.lessonLabel.length > 2 ? 10 : 13),
         ),
       ),
-      title: ScriptText(lesson.title, size: 14),
-      subtitle: Text('${lesson.pageCount} صفحات', style: TextStyle(color: book.muted, fontSize: 11)),
+      title: lesson.title != null ? ScriptText(lesson.title!, size: 14) : Text(l.lessonN(lesson.lessonLabel)),
+      subtitle: Text(l.pagesCount(lesson.pageCount), style: TextStyle(color: book.muted, fontSize: 11)),
       trailing: lesson.printedPage != null
-          ? Text('ص ${lesson.printedPage}', style: TextStyle(color: book.muted))
+          ? Text(l.pageShort(lesson.printedPage!), style: TextStyle(color: book.muted))
           : null,
     );
   }
@@ -276,7 +283,7 @@ class _PageTile extends StatelessWidget {
           ? SizedBox(width: 36, child: Text(leading!, textAlign: TextAlign.center, style: TextStyle(color: book.red)))
           : Icon(Icons.description_outlined, color: book.muted, size: 20),
       title: ScriptText(title, size: 13.5),
-      trailing: printedPage != null ? Text('ص $printedPage', style: TextStyle(color: book.muted)) : null,
+      trailing: printedPage != null ? Text(context.l10n.pageShort(printedPage!), style: TextStyle(color: book.muted)) : null,
     );
   }
 }

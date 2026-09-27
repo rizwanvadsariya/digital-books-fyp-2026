@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/answers_cubit.dart';
 import '../../blocs/settings_cubit.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/book_theme.dart';
 import '../../utils/arabic_text.dart';
 import '../keyboard/keyboard_cubit.dart';
@@ -94,7 +95,10 @@ class _AnswerFieldState extends State<AnswerField> {
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
+    final l = context.l10n;
     final isArabic = widget.language == KeyboardLanguage.arabic;
+    // Hints and labels are interface text: they follow the app language,
+    // unlike the book content around them.
     final textStyle = isArabic ? book.arabic(size: 20, height: 1.6) : book.urdu(size: 15, height: 1.9);
 
     return BlocListener<AnswersCubit, AnswersState>(
@@ -137,8 +141,8 @@ class _AnswerFieldState extends State<AnswerField> {
                       cursorColor: book.accent,
                       decoration: InputDecoration(
                         isDense: true,
-                        hintText: widget.hint ?? (isArabic ? 'یہاں عربی لکھیں' : 'یہاں جواب لکھیں'),
-                        hintStyle: book.urdu(size: 12, color: book.muted.withValues(alpha: 0.7), height: 1.6),
+                        hintText: widget.hint ?? (isArabic ? l.hintWriteArabic : l.hintWriteAnswer),
+                        hintStyle: uiTextStyle(context, color: book.muted.withValues(alpha: 0.7)),
                         contentPadding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
                         filled: active,
                         fillColor: book.accent.withValues(alpha: 0.08),
@@ -148,7 +152,7 @@ class _AnswerFieldState extends State<AnswerField> {
                         focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: lineColor, width: 2)),
                         suffixIcon: active && kb.useNative
                             ? IconButton(
-                                tooltip: 'عربی کی بورڈ',
+                                tooltip: l.useArabicKeyboard,
                                 icon: const Icon(Icons.translate, size: 18),
                                 onPressed: () => _keyboard.setUseNative(false),
                               )
@@ -168,7 +172,10 @@ class _AnswerFieldState extends State<AnswerField> {
                   padding: const EdgeInsets.only(top: 2),
                   child: Text.rich(
                     TextSpan(children: [
-                      TextSpan(text: 'درست جواب: ', style: book.urdu(size: 11, color: book.muted, height: 1.8)),
+                      TextSpan(
+                        text: l.correctAnswerLabel,
+                        style: uiTextStyle(context, size: 11, color: book.muted),
+                      ),
                       TextSpan(
                         text: widget.answerKey,
                         style: book.forScript(dominantScript(widget.answerKey!), size: 12, color: book.correct),
@@ -204,7 +211,7 @@ class _CheckButton extends StatelessWidget {
       height: 34,
       child: IconButton(
         padding: EdgeInsets.zero,
-        tooltip: 'جواب چیک کریں',
+        tooltip: context.l10n.checkAnswer,
         icon: Icon(icon, color: color, size: 22),
         onPressed: onPressed,
       ),

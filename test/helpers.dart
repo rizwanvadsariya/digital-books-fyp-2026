@@ -7,6 +7,7 @@ import 'package:muallim_ul_quran/blocs/answers_cubit.dart';
 import 'package:muallim_ul_quran/blocs/progress_cubit.dart';
 import 'package:muallim_ul_quran/blocs/settings_cubit.dart';
 import 'package:muallim_ul_quran/data/local_store.dart';
+import 'package:muallim_ul_quran/l10n/app_localizations.dart';
 import 'package:muallim_ul_quran/models/book.dart';
 import 'package:muallim_ul_quran/models/reader_settings.dart';
 import 'package:muallim_ul_quran/theme/book_theme.dart';
@@ -32,6 +33,7 @@ Widget harness(
   AnswersCubit? answers,
   KeyboardCubit? keyboard,
   SettingsCubit? settings,
+  Locale locale = const Locale('ur'),
 }) {
   return MultiBlocProvider(
     providers: [
@@ -42,6 +44,9 @@ Widget harness(
     ],
     child: MaterialApp(
       theme: buildAppTheme(const ReaderSettings()),
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Directionality(textDirection: TextDirection.rtl, child: Scaffold(body: child)),
     ),
   );

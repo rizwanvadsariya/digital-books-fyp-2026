@@ -31,6 +31,12 @@ flutter run -d macos    # or chrome / an emulator
 - **Page flip (`widgets/book_flip_view.dart`):** a `PageView` laid out LTR with **reversed indexes** (`positionForIndex`). Dragging left→right advances the book, and the page being turned always paints on top. Pages are counter-translated and the top page is rotated around its right-edge spine. Page transforms depend on this ordering.
 - **Scrolling a field into view** must use the nearest *vertical* `Scrollable` only (see `AnswerField._activate`). `Scrollable.ensureVisible` also scrolls the horizontal page turner, which flips the page and closes the keyboard. `test/widgets/reader_test.dart` guards this.
 - **Fonts / scripts:** Amiri for vocalised Arabic, Noto Nastaliq Urdu (a variable font; weight is set through `FontVariation('wght')`) for Urdu. `ScriptText` splits mixed text into per-script runs (`utils/arabic_text.dart`, `splitScriptRuns`). The heuristic is: harakat or Arabic letter forms (ي ك ه ة) → Arabic, and Urdu forms (ی ک ہ ے ٹ …) → Urdu. `BookTheme` (a `ThemeExtension`) carries the paper/sepia/dark palettes and the font scale.
+- **Interface language vs. book content:** interface strings live in `lib/l10n/app_{en,ur}.arb` (gen-l10n, and `flutter pub get` regenerates them). Access them with `context.l10n` from `lib/l10n/l10n.dart`. The user picks System/Urdu/English in Settings (`ReaderSettings.language`). This locale must **never** affect book content, so:
+  - Never pass text from the JSON through l10n.
+  - Page contents stay right-to-left: `BookFlipView` wraps pages in `Directionality.rtl`, and the page scrubber is forced RTL because it mirrors the book's page order.
+  - The badge printed on the page uses the Urdu `Book.locationLabel`. App bars and lists use the localized `pageLocation(l10n, page)`.
+  - Interface text placed on a book page (hints, "Singular/Plural", check tooltips) uses `uiTextStyle(context)`, not `BookTheme`'s book fonts.
+  - The Urdu interface uses Nastaliq (`withUiFont`). The English interface keeps the platform font, with a Nastaliq fallback for embedded Urdu such as lesson titles.
 - Answer checking (`answerMatches`) is lenient by default: it ignores harakat, folds Arabic/Urdu letter variants, and accepts any `/`- or `،`-separated alternative. Strict mode requires exact harakat.
 
 ## Data quirks (`assets/data/muallim_ul_quran_vol1_full.json`)

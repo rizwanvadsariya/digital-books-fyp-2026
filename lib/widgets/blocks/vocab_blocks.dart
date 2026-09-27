@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/answers_cubit.dart';
 import '../../blocs/settings_cubit.dart';
+import '../../l10n/l10n.dart';
 import '../../models/content_block.dart';
 import '../../theme/book_theme.dart';
 import '../../utils/arabic_text.dart';
@@ -109,7 +110,7 @@ class _VocabCard extends StatelessWidget {
           if (showMeaning)
             ScriptText(meaning!, size: 12.5, align: TextAlign.center, color: book.muted, forceScript: Script.urdu)
           else
-            AnswerField(id: id, answerKey: meaning, hint: 'مطلب'),
+            AnswerField(id: id, answerKey: meaning, hint: context.l10n.hintMeaning),
           if (extra != null) ScriptText(extra!, size: 11.5, align: TextAlign.center, color: book.muted),
         ],
       ),
@@ -128,7 +129,10 @@ class _SingularPluralCard extends StatelessWidget {
     Widget side(String? word, String? meaning, String label) => Expanded(
           child: Column(
             children: [
-              Text(label, style: book.urdu(size: 10, color: book.muted, height: 1.6)),
+              Text(
+                label,
+                style: uiTextStyle(context, size: 10, color: book.muted),
+              ),
               ScriptText(word ?? '—', size: 15, align: TextAlign.center, forceScript: Script.arabic),
               if (meaning != null) ScriptText(meaning, size: 11.5, color: book.muted, align: TextAlign.center),
             ],
@@ -146,12 +150,12 @@ class _SingularPluralCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              side(item.singular, item.singularMeaning, 'واحد'),
+              side(item.singular, item.singularMeaning, context.l10n.singular),
               Padding(
                 padding: const EdgeInsets.only(top: 22),
                 child: Icon(Icons.arrow_forward, size: 16, color: book.red),
               ),
-              side(item.plural, item.pluralMeaning, 'جمع'),
+              side(item.plural, item.pluralMeaning, context.l10n.plural),
             ],
           ),
           if (item.note != null) ScriptText(item.note!, size: 11.5, color: book.muted, align: TextAlign.center),

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/book_cubit.dart';
 import '../data/search_index.dart';
+import '../l10n/l10n.dart';
 import '../theme/book_theme.dart';
 import '../widgets/common/script_text.dart';
 
@@ -41,13 +42,14 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final book = context.read<BookCubit>().state.book!;
     final theme = BookTheme.of(context);
+    final l = context.l10n;
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(12),
           child: SearchBar(
             controller: _controller,
-            hintText: 'عربی لفظ، آیت یا اردو متن تلاش کریں',
+            hintText: l.searchHint,
             leading: const Icon(Icons.search),
             trailing: [
               if (_controller.text.isNotEmpty)
@@ -68,7 +70,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: Text(
-                _hits.length >= 200 ? '200+ نتائج' : '${_hits.length} نتائج',
+                _hits.length >= 200 ? l.searchResultsMax : l.searchResults(_hits.length),
                 style: TextStyle(color: theme.muted, fontSize: 12),
               ),
             ),
@@ -82,8 +84,8 @@ class _SearchScreenState extends State<SearchScreen> {
               final page = book.pages[hit.pageIndex];
               return ListTile(
                 title: ScriptText(hit.text.length > 160 ? '${hit.text.substring(0, 160)}…' : hit.text, size: 13.5),
-                subtitle: ScriptText(book.locationLabel(page), size: 11, color: theme.muted),
-                trailing: Text(page.printedPage != null ? 'ص ${page.printedPage}' : ''),
+                subtitle: Text(pageLocation(l, page), style: TextStyle(fontSize: 12, color: theme.muted)),
+                trailing: page.printedPage != null ? Text(l.pageShort(page.printedPage!)) : null,
                 onTap: () => widget.onOpen(hit.pageIndex),
               );
             },

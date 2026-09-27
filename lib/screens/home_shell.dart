@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import 'bookmarks_screen.dart';
 import 'home_screen.dart';
 import 'reader_screen.dart';
@@ -17,13 +18,13 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
 
-  static const _titles = ['معلم القرآن', 'فہرست', 'بک مارکس', 'تلاش'];
-
   @override
   Widget build(BuildContext context) {
     void open(int i) => openReader(context, i);
+    final l = context.l10n;
+    final titles = [l.appTitle, l.navContents, l.navBookmarks, l.navSearch];
     return Scaffold(
-      appBar: _tab == 0 ? null : AppBar(title: Text(_titles[_tab])),
+      appBar: _tab == 0 ? null : AppBar(title: Text(titles[_tab])),
       body: IndexedStack(
         index: _tab,
         children: [
@@ -36,15 +37,15 @@ class _HomeShellState extends State<HomeShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'ہوم'),
-          NavigationDestination(icon: Icon(Icons.toc_outlined), selectedIcon: Icon(Icons.toc), label: 'فہرست'),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: l.navHome),
+          NavigationDestination(icon: const Icon(Icons.toc_outlined), selectedIcon: const Icon(Icons.toc), label: l.navContents),
           NavigationDestination(
-            icon: Icon(Icons.bookmarks_outlined),
-            selectedIcon: Icon(Icons.bookmarks),
-            label: 'بک مارکس',
+            icon: const Icon(Icons.bookmarks_outlined),
+            selectedIcon: const Icon(Icons.bookmarks),
+            label: l.navBookmarks,
           ),
-          NavigationDestination(icon: Icon(Icons.search), label: 'تلاش'),
+          NavigationDestination(icon: const Icon(Icons.search), label: l.navSearch),
         ],
       ),
     );

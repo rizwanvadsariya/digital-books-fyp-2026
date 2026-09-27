@@ -1,3 +1,5 @@
+import '../../l10n/app_localizations.dart';
+
 enum KeyboardLanguage { arabic, urdu }
 
 /// Diacritics row shown on both layouts: fatha, damma, kasra, fathatan,
@@ -15,18 +17,19 @@ const harakatKeys = [
   'ـ', // tatweel
 ];
 
-const harakatNames = {
-  'َ': 'زبر',
-  'ُ': 'پیش',
-  'ِ': 'زیر',
-  'ً': 'دو زبر',
-  'ٌ': 'دو پیش',
-  'ٍ': 'دو زیر',
-  'ّ': 'شد',
-  'ْ': 'جزم',
-  'ٰ': 'کھڑا زبر',
-  'ـ': 'کشیدہ',
-};
+/// Localized name of a haraka key, shown as its tooltip.
+String harakaName(AppLocalizations l, String mark) => switch (mark) {
+      '\u064E' => l.harakaFatha,
+      '\u064F' => l.harakaDamma,
+      '\u0650' => l.harakaKasra,
+      '\u064B' => l.harakaFathatan,
+      '\u064C' => l.harakaDammatan,
+      '\u064D' => l.harakaKasratan,
+      '\u0651' => l.harakaShadda,
+      '\u0652' => l.harakaSukun,
+      '\u0670' => l.harakaAlef,
+      _ => l.harakaTatweel,
+    };
 
 /// Standard Arabic (101) letter layout, right-to-left per row.
 const arabicRows = [

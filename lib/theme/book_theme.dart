@@ -220,3 +220,26 @@ ThemeData buildAppTheme(ReaderSettings settings) {
     ),
   );
 }
+
+/// Interface text in Urdu uses Nastaliq; English uses the platform font,
+/// falling back to Nastaliq for any Urdu (e.g. lesson titles) inside it.
+/// Book pages set their own fonts through [BookTheme] and are unaffected.
+ThemeData withUiFont(ThemeData theme, {required bool urdu}) {
+  TextTheme apply(TextTheme t) => urdu
+      ? t.apply(fontFamily: urduFont, fontFamilyFallback: const [arabicFont])
+      : t.apply(fontFamilyFallback: const [urduFont, arabicFont]);
+  return theme.copyWith(textTheme: apply(theme.textTheme), primaryTextTheme: apply(theme.primaryTextTheme));
+}
+
+/// Style for interface text shown on a book page (hints, labels), in the
+/// interface font rather than the book's.
+TextStyle uiTextStyle(BuildContext context, {double size = 12, Color? color}) {
+  final base = Theme.of(context).textTheme.bodyMedium!;
+  return TextStyle(
+    fontFamily: base.fontFamily,
+    fontFamilyFallback: base.fontFamilyFallback,
+    fontSize: size * BookTheme.of(context).fontScale,
+    color: color,
+    height: base.fontFamily == urduFont ? 1.7 : 1.2,
+  );
+}

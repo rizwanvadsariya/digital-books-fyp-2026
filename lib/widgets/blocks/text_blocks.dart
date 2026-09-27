@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/block_style.dart';
 
+import '../../models/block_style.dart';
 import '../../models/content_block.dart';
 import '../../theme/book_theme.dart';
 import '../../utils/arabic_text.dart';

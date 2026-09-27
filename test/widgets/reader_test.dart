@@ -7,6 +7,7 @@ import 'package:muallim_ul_quran/blocs/progress_cubit.dart';
 import 'package:muallim_ul_quran/blocs/settings_cubit.dart';
 import 'package:muallim_ul_quran/data/book_repository.dart';
 import 'package:muallim_ul_quran/data/local_store.dart';
+import 'package:muallim_ul_quran/l10n/app_localizations.dart';
 import 'package:muallim_ul_quran/models/reader_settings.dart';
 import 'package:muallim_ul_quran/screens/reader_screen.dart';
 import 'package:muallim_ul_quran/theme/book_theme.dart';
@@ -14,7 +15,7 @@ import 'package:muallim_ul_quran/widgets/keyboard/arabic_keyboard.dart';
 
 import '../helpers.dart';
 
-Future<(LocalStore, ProgressCubit)> pumpReader(WidgetTester tester, int pdfPage) async {
+Future<(LocalStore, ProgressCubit)> pumpReader(WidgetTester tester, int pdfPage, {Locale locale = const Locale('ur')}) async {
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
@@ -31,10 +32,10 @@ Future<(LocalStore, ProgressCubit)> pumpReader(WidgetTester tester, int pdfPage)
     ],
     child: MaterialApp(
       theme: buildAppTheme(const ReaderSettings()),
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: ReaderScreen(initialIndex: bookCubit.state.book!.indexForPdfPage(pdfPage)!),
-      ),
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: ReaderScreen(initialIndex: bookCubit.state.book!.indexForPdfPage(pdfPage)!),
     ),
   ));
   await tester.pumpAndSettle();
@@ -63,6 +64,26 @@ void main() {
   testWidgets('swiping left-to-right advances the book (RTL)', (tester) async {
     final (_, progress) = await pumpReader(tester, 12);
     final start = progress.state.lastPageIndex!;
+    await tester.fling(find.byType(PageView), const Offset(300, 0), 1500);
+    await tester.pumpAndSettle();
+    expect(progress.state.lastPageIndex, start + 1);
+  });
+
+  testWidgets('English interface keeps the book right-to-left and in Urdu', (tester) async {
+    final (_, progress) = await pumpReader(tester, 12, locale: const Locale('en'));
+    final start = progress.state.lastPageIndex!;
+
+    // Interface text is English and laid out left-to-right…
+    expect(find.text('Unit 1 · Lesson 1'), findsOneWidget);
+    expect(Directionality.of(tester.element(find.byType(AppBar))), TextDirection.ltr);
+    // …while the page keeps the book's own Urdu badge, text and direction.
+    expect(find.text('یونٹ 1 · سبق 1'), findsOneWidget);
+    expect(find.text('درج ذیل سوالات کے زبانی جواب دیجئے'), findsOneWidget);
+    final pageText = find.text('درج ذیل سوالات کے زبانی جواب دیجئے');
+    expect(Directionality.of(tester.element(pageText)), TextDirection.rtl);
+    expect(find.text('Write your answer'), findsWidgets);
+
+    // Swiping left-to-right still advances the book.
     await tester.fling(find.byType(PageView), const Offset(300, 0), 1500);
     await tester.pumpAndSettle();
     expect(progress.state.lastPageIndex, start + 1);

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/book_theme.dart';
 import 'keyboard_cubit.dart';
 import 'keyboard_layouts.dart';
@@ -42,7 +43,7 @@ class ArabicKeyboard extends StatelessWidget {
                         _Toolbar(state: state),
                         _row([
                           for (final h in harakatKeys)
-                            _KeySpec.haraka(h, onTap: () => cubit.insert(h)),
+                            _KeySpec.haraka(h, name: harakaName(context.l10n, h), onTap: () => cubit.insert(h)),
                         ], unit),
                         for (final row in rows)
                           _row([for (final k in row) _KeySpec.letter(k, onTap: () => cubit.insert(k))], unit),
@@ -55,7 +56,9 @@ class ArabicKeyboard extends StatelessWidget {
                           ),
                           _KeySpec.letter('،', onTap: () => cubit.insert('،')),
                           _KeySpec(
-                            label: state.language == KeyboardLanguage.urdu ? 'اردو' : 'عربي',
+                            label: state.language == KeyboardLanguage.urdu
+                                ? context.l10n.keyboardUrdu
+                                : context.l10n.keyboardArabic,
                             flex: 4.5,
                             kind: _KeyKind.space,
                             onTap: () => cubit.insert(' '),
@@ -109,6 +112,7 @@ class _Toolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<KeyboardCubit>();
+    final l = context.l10n;
     return SizedBox(
       height: 40,
       child: Row(
@@ -119,9 +123,9 @@ class _Toolbar extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            segments: const [
-              ButtonSegment(value: KeyboardLanguage.arabic, label: Text('عربی')),
-              ButtonSegment(value: KeyboardLanguage.urdu, label: Text('اردو')),
+            segments: [
+              ButtonSegment(value: KeyboardLanguage.arabic, label: Text(l.keyboardArabic)),
+              ButtonSegment(value: KeyboardLanguage.urdu, label: Text(l.keyboardUrdu)),
             ],
             selected: {state.language},
             onSelectionChanged: (s) {
@@ -130,12 +134,12 @@ class _Toolbar extends StatelessWidget {
           ),
           const Spacer(),
           IconButton(
-            tooltip: 'فون کا کی بورڈ استعمال کریں',
+            tooltip: l.useDeviceKeyboard,
             icon: const Icon(Icons.keyboard_alt_outlined),
             onPressed: () => cubit.setUseNative(true),
           ),
           IconButton(
-            tooltip: 'کی بورڈ بند کریں',
+            tooltip: l.closeKeyboard,
             icon: const Icon(Icons.keyboard_hide_outlined),
             onPressed: cubit.dismiss,
           ),
@@ -162,11 +166,11 @@ class _KeySpec {
       _KeySpec(label: ch, flex: ch.length > 1 && ch != 'لا' ? 1.5 : 1, onTap: onTap);
 
   /// Harakat are drawn on a dotted circle (U+25CC) so the mark is visible.
-  factory _KeySpec.haraka(String mark, {required VoidCallback onTap}) => _KeySpec(
+  factory _KeySpec.haraka(String mark, {required String name, required VoidCallback onTap}) => _KeySpec(
         label: mark == 'ـ' ? 'ـ' : '◌$mark',
         kind: _KeyKind.haraka,
         onTap: onTap,
-        tooltip: harakatNames[mark],
+        tooltip: name,
       );
 
   final String? label;
@@ -219,7 +223,8 @@ class _KeyState extends State<_Key> {
             maxLines: 1,
             overflow: TextOverflow.visible,
             style: TextStyle(
-              fontFamily: arabicFont,
+              // The space bar shows the layout's name (interface text).
+              fontFamily: spec.kind == _KeyKind.space ? null : arabicFont,
               fontSize: switch (spec.kind) {
                 _KeyKind.haraka => 24,
                 _KeyKind.space || _KeyKind.function => 14,

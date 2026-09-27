@@ -58,7 +58,9 @@ class LessonEntry {
 
   final int unit;
   final String lessonLabel;
-  final String title;
+
+  /// The lesson's first heading from the book, if it has one.
+  final String? title;
   final int firstPageIndex;
   final int pageCount;
   final String? printedPage;
@@ -141,7 +143,9 @@ class Book {
     return null;
   }
 
-  /// Short human label for a page's position, e.g. "یونٹ 2 · سبق 4".
+  /// The book's own (Urdu) label for a page's position, e.g. "یونٹ 2 · سبق 4",
+  /// used for the badge printed on the page. Interface text uses the
+  /// localized `pageLocation` in `l10n/l10n.dart` instead.
   String locationLabel(BookPage page) {
     if (page.isLessonPage) return 'یونٹ ${page.unit} · سبق ${page.lessonLabel}';
     switch (page.pageKind) {
@@ -205,8 +209,7 @@ class Book {
         list.add(LessonEntry(
           unit: unit,
           lessonLabel: page.lessonLabel!,
-          title: _firstText(page, const {'heading', 'title', 'section_heading', 'subheading'}) ??
-              'سبق ${page.lessonLabel}',
+          title: _firstText(page, const {'heading', 'title', 'section_heading', 'subheading'}),
           firstPageIndex: page.index,
           pageCount: 1,
           printedPage: page.printedPage,
