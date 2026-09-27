@@ -157,7 +157,7 @@ class _VolumeShelf extends StatelessWidget {
     return Row(
       children: [
         for (final v in bookVolumes) ...[
-          if (v != bookVolumes.first) const SizedBox(width: 10),
+          if (v != bookVolumes.first) const SizedBox(width: 8),
           Expanded(
             child: Material(
               color: v == current
@@ -179,36 +179,57 @@ class _VolumeShelf extends StatelessWidget {
                       width: 1.5,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
+                  // Icon beside the text when there's room; stacked above it
+                  // on narrow cards (three volumes on a phone).
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final icon = Icon(
                         v == current ? Icons.menu_book : Icons.book_outlined,
                         color: v == current ? gold : null,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l.volumeN(v.number),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: v == current ? Colors.white : null,
-                              ),
+                      );
+                      final narrow = constraints.maxWidth < 130;
+                      final labels = Column(
+                        crossAxisAlignment: narrow
+                            ? CrossAxisAlignment.center
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.volumeN(v.number),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: v == current ? Colors.white : null,
                             ),
-                            Text(
-                              // Isolate the numeric range so RTL text doesn't read "4–5" as "5–4".
-                              l.unitsRange('\u2066${v.units}\u2069'),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: v == current ? Colors.white70 : null,
-                              ),
+                          ),
+                          Text(
+                            // Isolate numbers so RTL text doesn't read "4–5" as "5–4".
+                            v.units.contains('–')
+                                ? l.unitsRange('\u2066${v.units}\u2069')
+                                : l.unitN(v.units),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: v == current ? Colors.white70 : null,
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                        ],
+                      );
+                      if (narrow) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [icon, const SizedBox(height: 2), labels],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          icon,
+                          const SizedBox(width: 10),
+                          Expanded(child: labels),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

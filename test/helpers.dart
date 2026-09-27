@@ -24,6 +24,7 @@ Book loadBook([String path = 'assets/data/muallim_ul_quran_vol1_full.json']) => 
 
 const vol1Path = 'assets/data/muallim_ul_quran_vol1_full.json';
 const vol2Path = 'assets/data/muallim_ul_quran_vol2_full.json';
+const vol3Path = 'assets/data/muallim_ul_quran_vol3_full.json';
 
 Future<LocalStore> freshStore([Map<String, Object> values = const {}]) async {
   SharedPreferences.setMockInitialValues(values);

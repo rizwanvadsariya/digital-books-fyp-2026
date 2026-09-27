@@ -82,6 +82,9 @@ class VocabPairListBlockView extends StatelessWidget {
               meaning: block.items[i].note,
               id: answerId(pdfPage, blockIndex, i),
               practice: practice,
+              // Volumes 2–3 pairs can carry an inline Urdu gloss
+              // ("یَعْبُدُ : وہ عبادت کرتا ہے"); give each part its font.
+              mixedScript: true,
             ),
       ],
     );
@@ -96,9 +99,13 @@ class _VocabCard extends StatelessWidget {
     required this.practice,
     this.arabicColor,
     this.extra,
+    this.mixedScript = false,
   });
 
   final String arabic;
+
+  /// Detect Arabic/Urdu runs instead of forcing the Arabic font.
+  final bool mixedScript;
   final String? meaning;
   final String? extra;
   final String id;
@@ -125,7 +132,8 @@ class _VocabCard extends StatelessWidget {
             size: 16,
             align: TextAlign.center,
             color: arabicColor,
-            forceScript: Script.arabic,
+            forceScript: mixedScript ? null : Script.arabic,
+            fallback: Script.arabic,
           ),
           if (showMeaning)
             ScriptText(

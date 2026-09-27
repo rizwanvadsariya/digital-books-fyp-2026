@@ -43,6 +43,14 @@ const bookVolumes = [
     units: '4–5',
     storageNamespace: 'vol2.',
   ),
+  BookVolume(
+    id: 'vol3',
+    number: 3,
+    assetPath: 'assets/data/muallim_ul_quran_vol3_full.json',
+    coverSubtitle: 'جلد سوم',
+    units: '6',
+    storageNamespace: 'vol3.',
+  ),
 ];
 
 BookVolume volumeById(String? id) =>

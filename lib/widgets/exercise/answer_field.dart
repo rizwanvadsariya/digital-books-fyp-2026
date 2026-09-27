@@ -36,6 +36,9 @@ class AnswerField extends StatefulWidget {
 }
 
 class _AnswerFieldState extends State<AnswerField> {
+  /// Below this width the check button is placed under the field.
+  static const _stackBelowWidth = 96.0;
+
   late final TextEditingController _controller;
   final _focusNode = FocusNode();
   late final KeyboardCubit _keyboard;
@@ -135,68 +138,92 @@ class _AnswerFieldState extends State<AnswerField> {
             false => book.incorrect,
             null => active ? book.accent : book.fieldLine,
           };
+          final field = TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            readOnly: !kb.useNative,
+            showCursor: true,
+            onTap: _activate,
+            minLines: 1,
+            maxLines: 3,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+            style: textStyle,
+            cursorColor: book.accent,
+            decoration: InputDecoration(
+              isDense: true,
+              hintText:
+                  widget.hint ??
+                  (isArabic ? l.hintWriteArabic : l.hintWriteAnswer),
+              hintStyle: uiTextStyle(
+                context,
+                color: book.muted.withValues(alpha: 0.7),
+              ).copyWith(overflow: TextOverflow.ellipsis),
+              hintMaxLines: 1,
+              contentPadding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+              filled: active,
+              fillColor: book.accent.withValues(alpha: 0.08),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: lineColor,
+                  width: result == null ? 1 : 1.6,
+                ),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: lineColor, width: 2),
+              ),
+              suffixIcon: active && kb.useNative
+                  ? IconButton(
+                      tooltip: l.useArabicKeyboard,
+                      icon: const Icon(Icons.translate, size: 18),
+                      onPressed: () => _keyboard.setUseNative(false),
+                    )
+                  : null,
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
+              ),
+            ),
+          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      readOnly: !kb.useNative,
-                      showCursor: true,
-                      onTap: _activate,
-                      minLines: 1,
-                      maxLines: 3,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: textStyle,
-                      cursorColor: book.accent,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        hintText:
-                            widget.hint ??
-                            (isArabic ? l.hintWriteArabic : l.hintWriteAnswer),
-                        hintStyle: uiTextStyle(
-                          context,
-                          color: book.muted.withValues(alpha: 0.7),
-                        ).copyWith(overflow: TextOverflow.ellipsis),
-                        hintMaxLines: 1,
-                        contentPadding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-                        filled: active,
-                        fillColor: book.accent.withValues(alpha: 0.08),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: lineColor,
-                            width: result == null ? 1 : 1.6,
+              // Only fields with a check button need a layout-dependent
+              // arrangement (LayoutBuilder is costly across hundreds of
+              // blanks): in narrow table cells, e.g. an 8-column table on a
+              // phone, the button goes under the field instead of beside it.
+              if (widget.answerKey == null)
+                field
+              else
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final check = _CheckButton(
+                      result: result,
+                      onPressed: _check,
+                    );
+                    if (constraints.maxWidth < _stackBelowWidth) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          field,
+                          Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: check,
                           ),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: lineColor, width: 2),
-                        ),
-                        suffixIcon: active && kb.useNative
-                            ? IconButton(
-                                tooltip: l.useArabicKeyboard,
-                                icon: const Icon(Icons.translate, size: 18),
-                                onPressed: () => _keyboard.setUseNative(false),
-                              )
-                            : null,
-                        suffixIconConstraints: const BoxConstraints(
-                          minWidth: 32,
-                          minHeight: 32,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (widget.answerKey != null) ...[
-                    const SizedBox(width: 4),
-                    _CheckButton(result: result, onPressed: _check),
-                  ],
-                ],
-              ),
+                        ],
+                      );
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(child: field),
+                        const SizedBox(width: 4),
+                        check,
+                      ],
+                    );
+                  },
+                ),
               if (result == false && widget.answerKey != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),

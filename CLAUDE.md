@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Flutter app (**Muallim-Ul-Quran**) that renders the Urdu/Arabic Quran-learning textbook *Muallim-ul-Quran* — Volume 1 (`assets/data/muallim_ul_quran_vol1_full.json`, units 1–3) and Volume 2 (`…_vol2_full.json`, units 4–5). It provides a right-to-left, page-turning book reader, in-book exercises answered through an embedded Arabic/Urdu keyboard, and saved progress. State management is **flutter_bloc (Cubits)**. Persistence is **shared_preferences**. Do not introduce Riverpod or Hive.
+Flutter app (**Muallim-Ul-Quran**) that renders the Urdu/Arabic Quran-learning textbook *Muallim-ul-Quran* — Volume 1 (`assets/data/muallim_ul_quran_vol1_full.json`, units 1–3, 102 pages), Volume 2 (`…_vol2_full.json`, units 4–5, 115 pages) and Volume 3 (`…_vol3_full.json`, unit 6, 86 pages). It provides a right-to-left, page-turning book reader, in-book exercises answered through an embedded Arabic/Urdu keyboard, and saved progress. State management is **flutter_bloc (Cubits)**. Persistence is **shared_preferences**. Do not introduce Riverpod or Hive.
 
 ## Commands
 
 ```bash
 flutter pub get
 flutter analyze
-flutter test                                        # all tests (~20s; renders all 102 pages twice)
+flutter test                                        # all tests (renders every page of every volume twice)
 flutter test test/utils/arabic_text_test.dart       # one file
 flutter test --plain-name 'check button grades'     # one test by name
 flutter run -d macos    # or chrome / an emulator
@@ -61,4 +61,10 @@ Volume 2 adds these shapes, all handled by the shared parser:
 - One contents row has `صفحہ: null`.
 - Unit covers' `unit_marker` is just a number (circle badge). The page header pins only non-numeric markers.
 
-Glyphs: `←` (248 times) and `↔` (24 times) aren't in Amiri or Nastaliq. `assets/fonts/NotoSansMath-Arrows.ttf` (family `BookSymbols`, a U+2190–21FF subset) is in every book and interface font's fallback list. Draw decorative markers such as ◆ as shapes, not characters.
+Volume 3 adds these (no new block types or styles; `test/models/volume3_parsing_test.dart` guards that):
+- `vocab_list.items` are plain strings, parsed as words with no meaning.
+- **All** tables use list rows. Most start each row with an unheaded "مثال N" label cell (one more cell than `columns`). The headers shift past it: see `labelOffset` in `TableBlock.fromJson`. Look columns up with `TableBlock.keyForHeader`, never by row key.
+- The printed contents is `page_kind: "index"`, spans 2 pages, and has columns سبق/عنوان/ہدف/صفحہ with zero-padded page numbers. Use `BookPage.isContentsPage` and `Book.contentsPages`.
+- Front-matter pages (`preface`, `instructions`) carry `unit: 6`. Front matter is decided by position (`Book.frontMatter`), never by `unit == null`.
+
+Glyphs: `←` (374 times across Vols 1–3) and `↔` (24 times) aren't in Amiri or Nastaliq. `assets/fonts/NotoSansMath-Arrows.ttf` (family `BookSymbols`, a U+2190–21FF subset) is in every book and interface font's fallback list. Draw decorative markers such as ◆ as shapes, not characters.

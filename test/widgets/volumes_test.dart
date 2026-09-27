@@ -78,6 +78,29 @@ void main() {
     expect(store.forVolume('vol2.').readAnswers(), isEmpty);
   });
 
+  testWidgets('Volume 3 opens with unit 6, its front matter and printed contents', (tester) async {
+    final store = await freshStore({'settings.v1': '{"language":"english"}'});
+    await pumpApp(tester, store);
+
+    // Three volume cards, same style.
+    expect(find.text('Volume 1'), findsOneWidget);
+    expect(find.text('Volume 2'), findsOneWidget);
+    expect(find.text('Volume 3'), findsOneWidget);
+    expect(find.text('Unit 6'), findsOneWidget);
+
+    await tester.tap(find.text('Volume 3'));
+    await tester.pumpAndSettle();
+    expect(find.text('جلد سوم'), findsOneWidget);
+    expect(store.readSelectedVolume(), 'vol3');
+
+    await tester.tap(find.text('Contents').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Unit 6'), findsWidgets);
+    expect(find.text('Introduction'), findsWidgets, reason: 'front-matter chip');
+    expect(find.text("Book's contents"), findsOneWidget);
+    expect(find.text('Unit 5'), findsNothing);
+  });
+
   testWidgets('the selected volume is restored on launch', (tester) async {
     final store = await freshStore({'settings.v1': '{"language":"english"}', 'library.volume': 'vol2'});
     await pumpApp(tester, store);

@@ -72,12 +72,16 @@ sealed class ContentBlock {
             highlight: highlight,
             columns: _int(json['columns']),
             items: [
-              for (final m in _mapList(json['items']))
-                VocabItem(
-                  arabic: _str(m['arabic']) ?? '',
-                  note: _str(m['note']),
-                  note2: _str(m['note2']),
-                ),
+              for (final m in (json['items'] is List ? json['items'] as List : const []))
+                if (m is Map)
+                  VocabItem(
+                    arabic: _str(m['arabic']) ?? '',
+                    note: _str(m['note']),
+                    note2: _str(m['note2']),
+                  )
+                // Volume 3 lists bare phrases: a word with no printed meaning.
+                else if (m is String && m.trim().isNotEmpty)
+                  VocabItem(arabic: m),
             ],
           );
         case 'vocab_pair_list':
@@ -302,8 +306,8 @@ class TableBlock extends ContentBlock {
     final columns = [
       for (final c in (json['columns'] is List ? json['columns'] as List : const [])) c?.toString() ?? '',
     ];
-    // Rows are usually maps keyed by header; a few (Volume 2) are plain lists
-    // matched to `columns` by position. Positional keys keep blank or
+    // Rows are usually maps keyed by header; some (Volumes 2–3) are plain
+    // lists matched to `columns` by position. Positional keys keep blank or
     // repeated headers distinct.
     final rowsJson = json['rows'] is List ? json['rows'] as List : const [];
     final rawRows = <Map<String, dynamic>>[
@@ -319,9 +323,15 @@ class TableBlock extends ContentBlock {
         if (!keys.contains(k)) keys.add(k);
       }
     }
+    // Volume 3 list rows often start with an unheaded row label ("مثال 1"):
+    // one more cell than headers. Shift the headers past that label column.
+    final listRowWidth = rowsJson.whereType<List>().fold<int>(0, (w, r) => r.length > w ? r.length : w);
+    final labelOffset = listRowWidth == columns.length + 1 ? 1 : 0;
     final headers = [
       for (var i = 0; i < keys.length; i++)
-        columns.length == keys.length ? columns[i] : _headerFor(keys[i], keys, columns, i),
+        columns.length == keys.length && labelOffset == 0
+            ? columns[i]
+            : _headerFor(keys[i], keys, columns, labelOffset),
     ];
     final isLabelText = keys.length == 2 && keys.contains('label') && keys.contains('text');
     return TableBlock(
@@ -340,12 +350,15 @@ class TableBlock extends ContentBlock {
   }
 
   /// Display header for a row key when `columns` doesn't line up with the
-  /// keys: positional keys use the printed column, a disambiguated duplicate
+  /// keys: positional keys use the printed column (after any unheaded row
+  /// label column, which gets a blank header), a disambiguated duplicate
   /// (`مطلب2`, `مطلب ۲`) shows its base header, and `note` shows no header.
-  static String _headerFor(String key, List<String> keys, List<String> columns, int index) {
+  static String _headerFor(String key, List<String> keys, List<String> columns, int labelOffset) {
     if (key.startsWith('#')) {
       final i = int.tryParse(key.substring(1));
-      return i != null && i < columns.length ? columns[i] : '';
+      if (i == null) return '';
+      final c = i - labelOffset;
+      return c >= 0 && c < columns.length ? columns[c] : '';
     }
     if (key == 'note') return '';
     final base = key.replaceFirst(RegExp(r'\s*[0-9۰-۹٠-٩]+$'), '');
@@ -356,6 +369,13 @@ class TableBlock extends ContentBlock {
   final List<String> keys;
   final List<String> headers;
   final List<Map<String, String?>> rows;
+
+  /// Row key of the column printed under [header], whether rows are keyed
+  /// by header text or by position.
+  String? keyForHeader(String header) {
+    final i = headers.indexOf(header);
+    return i < 0 ? null : keys[i];
+  }
   final String? caption;
   final String? name;
   final bool showHeader;

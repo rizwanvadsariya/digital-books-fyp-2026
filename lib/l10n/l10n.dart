@@ -23,13 +23,13 @@ String pageLocation(AppLocalizations l, BookPage page) {
       return l.unitIntro('${page.unit ?? ''}');
     case 'sample_exam':
       return l.sampleExam;
-    case 'table_of_contents':
+    case 'table_of_contents' || 'index':
       return l.tableOfContents;
     case 'back_matter':
       return l.backMatter;
     case 'model_paper':
       return page.unit != null ? l.unitModelPaper('${page.unit}') : l.modelPaper;
-    case 'guidance_notes':
+    case 'guidance_notes' || 'instructions':
       return l.guidanceNotes;
     // Any other kind (e.g. a future one) falls through to the generic label.
   }

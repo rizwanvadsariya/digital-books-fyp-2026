@@ -44,6 +44,9 @@ class BookPage {
       lessonLabel == null ? null : int.tryParse(lessonLabel!.split('-').first.trim());
 
   bool get isLessonPage => unit != null && lessonLabel != null;
+
+  /// The book's printed table of contents (`index` in Volume 3).
+  bool get isContentsPage => pageKind == 'table_of_contents' || pageKind == 'index';
 }
 
 class LessonEntry {
@@ -143,6 +146,20 @@ class Book {
     return null;
   }
 
+  /// The printed table-of-contents pages (it can span several pages).
+  late final List<BookPage> contentsPages = [for (final p in pages) if (p.isContentsPage) p];
+
+  /// Pages before the first unit cover or lesson: preface, guidance notes,
+  /// etc. Decided by position, since Volume 3 sets `unit` even on these.
+  /// The printed contents is excluded (it is listed on its own).
+  late final List<BookPage> frontMatter = () {
+    final start = pages.indexWhere((p) => p.pageKind == 'unit_cover' || p.isLessonPage);
+    return [
+      for (final p in pages)
+        if ((start < 0 || p.index < start) && !p.isContentsPage) p,
+    ];
+  }();
+
   /// The book's own (Urdu) label for a page's position, e.g. "یونٹ 2 · سبق 4",
   /// used for the badge printed on the page. Interface text uses the
   /// localized `pageLocation` in `l10n/l10n.dart` instead.
@@ -155,13 +172,13 @@ class Book {
         return 'یونٹ ${page.unit ?? ''} · تعارف';
       case 'sample_exam':
         return 'نمونہ امتحان';
-      case 'table_of_contents':
+      case 'table_of_contents' || 'index':
         return 'فہرست';
       case 'back_matter':
         return 'اختتامیہ';
       case 'model_paper':
         return page.unit != null ? 'یونٹ ${page.unit} · ماڈل پیپر' : 'ماڈل پیپر';
-      case 'guidance_notes':
+      case 'guidance_notes' || 'instructions':
         return 'ہدایات';
     }
     return 'مقدمہ';

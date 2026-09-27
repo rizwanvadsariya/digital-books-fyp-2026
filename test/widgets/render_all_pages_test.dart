@@ -11,7 +11,7 @@ import '../helpers.dart';
 /// constraints from an unusual block shape — or on a block that renders no
 /// text at all.
 void main() {
-  for (final path in [vol1Path, vol2Path]) {
+  for (final path in [vol1Path, vol2Path, vol3Path]) {
     final book = loadBook(path);
     for (final practice in [false, true]) {
       testWidgets('${book.title}: all ${book.length} pages render with content (practice: $practice)', (tester) async {
@@ -30,16 +30,21 @@ void main() {
 
           final withContent = <int>{};
           final rendered = <int>{};
+          // One walk of the element tree per scroll step (searching the tree
+          // once per block is quadratic on long pages).
           void collect() {
-            for (final element in find.byType(BlockRenderer).evaluate()) {
-              final block = element.widget as BlockRenderer;
-              rendered.add(block.blockIndex);
-              final hasText = find
-                  .descendant(of: find.byWidget(block), matching: find.byType(RichText))
-                  .evaluate()
-                  .any((e) => (e.widget as RichText).text.toPlainText().trim().isNotEmpty);
-              if (hasText) withContent.add(block.blockIndex);
+            void visit(Element e, int? block) {
+              final w = e.widget;
+              if (w is BlockRenderer) {
+                block = w.blockIndex;
+                rendered.add(block);
+              } else if (block != null && w is RichText && w.text.toPlainText().trim().isNotEmpty) {
+                withContent.add(block);
+              }
+              e.visitChildElements((c) => visit(c, block));
             }
+
+            visit(tester.binding.rootElement!, null);
           }
 
           // Scroll through the whole page so lazily built blocks get laid out.

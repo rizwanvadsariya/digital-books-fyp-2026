@@ -29,7 +29,8 @@ class TableBlockView extends StatelessWidget {
     final book = BookTheme.of(context);
     final practice = context.select<SettingsCubit, bool>((c) => c.state.practiceMode);
     final nav = ReaderNavigation.maybeOf(context);
-    final pageKey = block.keys.contains(_pageColumn) ? _pageColumn : null;
+    // Found by header so list-row tables (Volume 3's contents) work too.
+    final pageKey = block.keyForHeader(_pageColumn);
 
     final columnWidths = <int, TableColumnWidth>{
       for (var c = 0; c < block.keys.length; c++)
@@ -47,8 +48,12 @@ class TableBlockView extends StatelessWidget {
       final isMeaning = header.startsWith('مطلب') || header.contains('کا مطلب');
       final id = answerId(pdfPage, blockIndex, '$row-$col');
       if (value == null) {
-        // The printed contents table has empty cells that aren't exercises.
-        if (pageKey != null) return const SizedBox.shrink();
+        // The printed contents table has empty cells that aren't exercises,
+        // and neither are gaps in a row-label column (sized to its content,
+        // which a text field can't report).
+        if (pageKey != null || columnWidths[col] is IntrinsicColumnWidth) {
+          return const SizedBox.shrink();
+        }
         return AnswerField(id: id, language: isMeaning ? KeyboardLanguage.urdu : KeyboardLanguage.arabic);
       }
       if (practice && isMeaning) return AnswerField(id: id, answerKey: value);

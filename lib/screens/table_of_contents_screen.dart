@@ -63,17 +63,9 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
     final book = context.read<BookCubit>().state.book!;
     final bookTheme = BookTheme.of(context);
     final l = context.l10n;
-    // Front matter: unit-less pages before the first unit (the printed
-    // contents page is listed with the extras instead).
-    final firstUnitPage = book.pages.indexWhere((p) => p.unit != null);
-    final frontMatter = [
-      for (final p in book.pages)
-        if (p.unit == null &&
-            (firstUnitPage < 0 || p.index < firstUnitPage) &&
-            p.pageKind != 'unit_cover' &&
-            p.pageKind != 'table_of_contents')
-          p,
-    ];
+    // Front matter: pages before the first unit (the printed contents page
+    // is listed with the extras instead).
+    final frontMatter = book.frontMatter;
     // Extras: special pages (exam, model paper, contents…) that aren't part
     // of a lesson. Lesson pages with a kind (e.g. key_words) stay in their
     // lesson.
@@ -86,13 +78,13 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
             !frontMatter.contains(p))
           p,
     ];
-    final printedToc = book.firstPageOfKind('table_of_contents');
+    final printedRows = _printedRows(book.contentsPages);
 
     final chips = <(String, String)>[
       if (frontMatter.isNotEmpty) ('front', l.chipFront),
       for (final u in book.units) ('unit${u.unit}', l.unitN('${u.unit}')),
       if (extras.isNotEmpty) ('extra', l.chipExtra),
-      if (printedToc != null) ('printed', l.chipPrinted),
+      if (printedRows.isNotEmpty) ('printed', l.chipPrinted),
     ];
 
     return Column(
@@ -156,9 +148,9 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
                     selected: widget.currentIndex == p.index,
                     onTap: () => widget.onOpen(p.index),
                   ),
-                if (printedToc != null) ...[
+                if (printedRows.isNotEmpty) ...[
                   _SectionHeader(key: _key('printed'), title: l.sectionPrinted),
-                  for (final row in _printedRows(printedToc))
+                  for (final row in printedRows)
                     _PageTile(
                       title: row.$1,
                       leading: row.$2,
@@ -204,10 +196,21 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
   }
 
   /// (topic, lesson, printed page) rows from the printed contents tables.
-  static List<(String, String?, String?)> _printedRows(BookPage page) => [
-    for (final b in page.blocks)
-      if (b is TableBlock && b.keys.contains('موضوع'))
-        for (final r in b.rows) (r['موضوع'] ?? '', r['سبق'], r['صفحہ']),
+  /// Columns are found by their printed headers: Volumes 1–2 use موضوع,
+  /// Volume 3 splits it into عنوان (title) and ہدف (goal).
+  static List<(String, String?, String?)> _printedRows(List<BookPage> pages) => [
+    for (final page in pages)
+      for (final b in page.blocks)
+        if (b is TableBlock && b.keyForHeader('صفحہ') != null)
+          for (final r in b.rows)
+            (
+              [
+                for (final h in const ['موضوع', 'عنوان', 'ہدف'])
+                  if (b.keyForHeader(h) case final k? when r[k] != null) r[k]!,
+              ].join(' '),
+              b.keyForHeader('سبق') == null ? null : r[b.keyForHeader('سبق')],
+              r[b.keyForHeader('صفحہ')],
+            ),
   ];
 }
 

@@ -65,6 +65,7 @@ flutter:
   assets:
     - assets/data/muallim_ul_quran_vol1_full.json
     - assets/data/muallim_ul_quran_vol2_full.json
+    - assets/data/muallim_ul_quran_vol3_full.json
     - assets/fonts/OFL-Amiri.txt
     - assets/fonts/OFL-NotoNastaliqUrdu.txt
     - assets/fonts/OFL-NotoSansMath.txt
