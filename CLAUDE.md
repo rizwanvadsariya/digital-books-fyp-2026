@@ -1,0 +1,42 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project
+
+Flutter app (**Muallim-Ul-Quran**) that renders the Urdu/Arabic Quran-learning textbook *Muallim-ul-Quran, Volume 1* from `assets/data/muallim_ul_quran_vol1_full.json`. It provides a right-to-left, page-turning book reader, in-book exercises answered through an embedded Arabic/Urdu keyboard, and saved progress. State management is **flutter_bloc (Cubits)**. Persistence is **shared_preferences**. Do not introduce Riverpod or Hive.
+
+## Commands
+
+```bash
+flutter pub get
+flutter analyze
+flutter test                                        # all tests (~20s; renders all 102 pages twice)
+flutter test test/utils/arabic_text_test.dart       # one file
+flutter test --plain-name 'check button grades'     # one test by name
+flutter run -d macos    # or chrome / an emulator
+```
+
+`test/widgets/render_all_pages_test.dart` pumps every page of the real JSON in normal and practice mode and fails on any layout exception. Run it after changing any block widget. Widget tests use Flutter's placeholder test font. To see real Arabic/Nastaliq rendering, load the fonts with `FontLoader` in a throwaway golden test and view the PNGs.
+
+## Architecture
+
+- `lib/models/content_block.dart`: a sealed `ContentBlock` hierarchy with a never-throwing `fromJson`. Text-like types (`heading`, `paragraph`, `note_box`, `instruction`, …) share one `TextBlock` model, distinguished by `type`. Structured types have their own classes. Unknown or malformed types become `UnknownBlock`, which renders every string it contains.
+- `lib/models/block_style.dart`: the `style` field is free-form (19 values). It is decoded **by token** (`red`, `bold`, `boxed`, `ornamental`, `black_badge`, …) rather than as an enum, so new combinations render without code changes.
+- `lib/models/book.dart`: `Book` builds `units` (Unit → Lesson → page) by scanning page `unit`/`lesson` fields. Lessons can be string ranges (`"15-16"`). Unit cover pages lack a `unit` field and are attached to the following unit. Also maps printed page numbers ↔ page indexes.
+- `lib/widgets/blocks/block_renderer.dart`: dispatches on the sealed type. Blocks receive `pdfPage` and `blockIndex`, which form the answer IDs.
+- **Answer IDs** are `{pdf_page}_{block_index}_{item_index}` (`answerId()` in `blocs/answers_cubit.dart`). Table cells use `{row}-{col}` as the item index. `block_index` is the position in the page's raw `blocks` array, including pinned markers, so never re-index blocks. `data/exercise_lookup.dart` resolves an ID back to its prompt and answer key for the review screen.
+- **Blank vs. answer key:** a `null` `note`/`translation`/table cell is a blank for the student. A non-null value is the book's printed answer, which is shown normally. **Practice mode** (setting) hides printed answers and turns them into self-check fields. A `vocab_list` note of `"red"` is a formatting marker (new word shown in red), not a meaning (`VocabItem.meaning`).
+- **Keyboard:** `widgets/keyboard/keyboard_cubit.dart` holds the active field's `TextEditingController`. `AnswerField` is `readOnly` while the custom keyboard is in use, so the OS keyboard stays hidden. It becomes editable when the user switches to the native keyboard. The docked `ArabicKeyboard` is shown by `ReaderScreen` in place of the page scrubber. Harakat are combining marks inserted at the caret. Backspace deletes one code point, so a haraka can be removed without deleting its letter. A `KeyboardCubit` is scoped to each reader route.
+- **Page flip (`widgets/book_flip_view.dart`):** a `PageView` laid out LTR with **reversed indexes** (`positionForIndex`). Dragging left→right advances the book, and the page being turned always paints on top. Pages are counter-translated and the top page is rotated around its right-edge spine. Page transforms depend on this ordering.
+- **Scrolling a field into view** must use the nearest *vertical* `Scrollable` only (see `AnswerField._activate`). `Scrollable.ensureVisible` also scrolls the horizontal page turner, which flips the page and closes the keyboard. `test/widgets/reader_test.dart` guards this.
+- **Fonts / scripts:** Amiri for vocalised Arabic, Noto Nastaliq Urdu (a variable font; weight is set through `FontVariation('wght')`) for Urdu. `ScriptText` splits mixed text into per-script runs (`utils/arabic_text.dart`, `splitScriptRuns`). The heuristic is: harakat or Arabic letter forms (ي ك ه ة) → Arabic, and Urdu forms (ی ک ہ ے ٹ …) → Urdu. `BookTheme` (a `ThemeExtension`) carries the paper/sepia/dark palettes and the font scale.
+- Answer checking (`answerMatches`) is lenient by default: it ignores harakat, folds Arabic/Urdu letter variants, and accepts any `/`- or `،`-separated alternative. Strict mode requires exact harakat.
+
+## Data quirks (`assets/data/muallim_ul_quran_vol1_full.json`)
+
+- `columns` is an int layout hint on vocab and verse lists, but a list of header strings on tables.
+- Table `rows` are keyed by header text. Repeated headers are disambiguated only in the row keys (`مطلب`, `مطلب ۲`), so column order comes from the row keys (`TableBlock.keys`) and labels from `columns` (`TableBlock.headers`).
+- `vocab_pair_list` items are either `{pair, note}` or `{singular, plural, …meaning?}`. `question` blocks have `items` (words to answer) or `verses` (snippets to identify a part of).
+- The printed contents page (`page_kind: table_of_contents`) has `سبق/صفحہ/موضوع` rows. Tapping a row jumps to that printed page.
+- `↔`/`←` appear in the text but aren't in Amiri. They depend on the platform's fallback font.

@@ -1,0 +1,409 @@
+import 'block_style.dart';
+
+/// Every `type` string emitted by the extraction that maps to a [TextBlock].
+const textBlockTypes = {
+  'book_title',
+  'title',
+  'unit_title',
+  'section_heading',
+  'heading',
+  'subheading',
+  'section_marker',
+  'unit_marker',
+  'lesson_marker',
+  'tagline',
+  'paragraph',
+  'instruction',
+  'translation_line',
+  'list_item',
+  'note',
+  'note_box',
+  'highlight',
+  'unit_summary_box',
+  'copyright_notice',
+  'signature_block',
+};
+
+String? _str(dynamic v) {
+  if (v == null) return null;
+  final s = v.toString();
+  return s.isEmpty ? null : s;
+}
+
+int? _int(dynamic v) {
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  if (v is String) return int.tryParse(v);
+  return null;
+}
+
+List<String> _strList(dynamic v) {
+  if (v is! List) return const [];
+  return [for (final e in v) if (e != null) e.toString()];
+}
+
+List<Map<String, dynamic>> _mapList(dynamic v) {
+  if (v is! List) return const [];
+  return [for (final e in v) if (e is Map) Map<String, dynamic>.from(e)];
+}
+
+/// One typed content block from a page's `blocks` array.
+///
+/// [ContentBlock.fromJson] never throws on unexpected input: unknown types (or
+/// known types with unexpected shapes) become an [UnknownBlock] that renders
+/// whatever text it can find.
+sealed class ContentBlock {
+  const ContentBlock({required this.type, required this.style, this.highlight = false});
+
+  final String type;
+  final BlockStyle style;
+  final bool highlight;
+
+  factory ContentBlock.fromJson(Map<String, dynamic> json) {
+    final type = _str(json['type']) ?? 'unknown';
+    final style = BlockStyle.parse(_str(json['style']));
+    final highlight = json['highlight'] == true;
+    try {
+      switch (type) {
+        case 'vocab_list':
+          return VocabListBlock(
+            type: type,
+            style: style,
+            highlight: highlight,
+            columns: _int(json['columns']),
+            items: [
+              for (final m in _mapList(json['items']))
+                VocabItem(
+                  arabic: _str(m['arabic']) ?? '',
+                  note: _str(m['note']),
+                  note2: _str(m['note2']),
+                ),
+            ],
+          );
+        case 'vocab_pair_list':
+          return VocabPairListBlock(
+            type: type,
+            style: style,
+            highlight: highlight,
+            columns: _int(json['columns']),
+            items: [
+              for (final m in _mapList(json['items']))
+                VocabPairItem(
+                  pair: _str(m['pair']),
+                  singular: _str(m['singular']),
+                  plural: _str(m['plural']),
+                  singularMeaning: _str(m['singular_meaning']),
+                  pluralMeaning: _str(m['plural_meaning']),
+                  note: _str(m['note']),
+                ),
+            ],
+          );
+        case 'quran_verse_translate':
+          return VerseTranslateBlock(
+            type: type,
+            style: style,
+            highlight: highlight,
+            columns: _int(json['columns']),
+            items: [
+              for (final m in _mapList(json['items']))
+                VerseTranslation(
+                  verse: _str(m['verse']) ?? '',
+                  translation: _str(m['translation']),
+                ),
+            ],
+          );
+        case 'table':
+          return TableBlock.fromJson(json, style: style, highlight: highlight);
+        case 'question':
+          return QuestionBlock(
+            type: type,
+            style: style,
+            highlight: highlight,
+            number: _int(json['number']),
+            text: _str(json['text']) ?? '',
+            items: _strList(json['items']),
+            verses: _strList(json['verses']),
+          );
+        case 'quran_verse':
+          return QuranVerseBlock(
+            type: type,
+            style: style,
+            highlight: highlight,
+            text: _str(json['text']) ?? '',
+            note: _str(json['note']),
+          );
+        case 'bullet_list':
+          return BulletListBlock(
+            type: type,
+            style: style,
+            highlight: highlight,
+            items: _strList(json['items']),
+          );
+      }
+      if (textBlockTypes.contains(type)) {
+        return TextBlock(
+          type: type,
+          style: style,
+          highlight: highlight,
+          text: _str(json['text']) ?? '',
+          number: _int(json['number']),
+          label: _str(json['label']),
+          date: _str(json['date']),
+          bullet: json['bullet'] == true,
+          items: _strList(json['items']),
+        );
+      }
+    } catch (_) {
+      // Fall through to the generic renderer below.
+    }
+    return UnknownBlock(type: type, style: style, highlight: highlight, raw: json);
+  }
+}
+
+/// Any block whose content is primarily a single run of text: titles,
+/// headings, markers, paragraphs, notes, boxes, etc. The widget layer decides
+/// presentation from [type] and [style].
+class TextBlock extends ContentBlock {
+  const TextBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    required this.text,
+    this.number,
+    this.label,
+    this.date,
+    this.bullet = false,
+    this.items = const [],
+  });
+
+  final String text;
+  final int? number;
+  final String? label;
+  final String? date;
+  final bool bullet;
+
+  /// Sub-items (e.g. the words listed under an `instruction`, or the
+  /// paragraphs of a `unit_summary_box`).
+  final List<String> items;
+}
+
+class VocabItem {
+  const VocabItem({required this.arabic, this.note, this.note2});
+
+  final String arabic;
+  final String? note;
+  final String? note2;
+
+  /// In the source data `"red"` marks the word as newly introduced (printed in
+  /// red); it is a formatting flag, not a meaning.
+  bool get isRedMarker => note == 'red';
+
+  /// The Urdu meaning printed in the book, if any.
+  String? get meaning => isRedMarker ? null : note;
+}
+
+class VocabListBlock extends ContentBlock {
+  const VocabListBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    this.columns,
+    required this.items,
+  });
+
+  final int? columns;
+  final List<VocabItem> items;
+}
+
+/// Either a singular/plural pair or an Arabic phrase with its Urdu meaning.
+class VocabPairItem {
+  const VocabPairItem({
+    this.pair,
+    this.singular,
+    this.plural,
+    this.singularMeaning,
+    this.pluralMeaning,
+    this.note,
+  });
+
+  final String? pair;
+  final String? singular;
+  final String? plural;
+  final String? singularMeaning;
+  final String? pluralMeaning;
+  final String? note;
+
+  bool get isSingularPlural => singular != null || plural != null;
+}
+
+class VocabPairListBlock extends ContentBlock {
+  const VocabPairListBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    this.columns,
+    required this.items,
+  });
+
+  final int? columns;
+  final List<VocabPairItem> items;
+}
+
+class VerseTranslation {
+  const VerseTranslation({required this.verse, this.translation});
+
+  final String verse;
+
+  /// `null` means the book leaves this line blank for the student.
+  final String? translation;
+}
+
+class VerseTranslateBlock extends ContentBlock {
+  const VerseTranslateBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    this.columns,
+    required this.items,
+  });
+
+  final int? columns;
+  final List<VerseTranslation> items;
+}
+
+/// A table whose rows are keyed by column header text.
+///
+/// The printed `columns` list can repeat a header (e.g. two `مطلب` columns),
+/// while row keys are disambiguated (`مطلب`, `مطلب ۲`), and some tables have
+/// no `columns` at all. [keys] is the authoritative column order taken from
+/// the rows; [headers] are display labels aligned with [keys].
+class TableBlock extends ContentBlock {
+  const TableBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    required this.keys,
+    required this.headers,
+    required this.rows,
+    this.caption,
+    this.name,
+    this.showHeader = true,
+  });
+
+  factory TableBlock.fromJson(
+    Map<String, dynamic> json, {
+    required BlockStyle style,
+    required bool highlight,
+  }) {
+    final rawRows = _mapList(json['rows']);
+    final keys = <String>[];
+    for (final r in rawRows) {
+      for (final k in r.keys) {
+        if (!keys.contains(k)) keys.add(k);
+      }
+    }
+    final columns = _strList(json['columns']);
+    final headers = [
+      for (var i = 0; i < keys.length; i++)
+        columns.length == keys.length ? columns[i] : keys[i],
+    ];
+    final isLabelText = keys.length == 2 && keys.contains('label') && keys.contains('text');
+    return TableBlock(
+      type: 'table',
+      style: style,
+      highlight: highlight,
+      keys: keys,
+      headers: headers,
+      rows: [
+        for (final r in rawRows) {for (final k in keys) k: _str(r[k])},
+      ],
+      caption: _str(json['caption']),
+      name: _str(json['name']),
+      showHeader: !isLabelText,
+    );
+  }
+
+  final List<String> keys;
+  final List<String> headers;
+  final List<Map<String, String?>> rows;
+  final String? caption;
+  final String? name;
+  final bool showHeader;
+}
+
+class QuestionBlock extends ContentBlock {
+  const QuestionBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    this.number,
+    required this.text,
+    this.items = const [],
+    this.verses = const [],
+  });
+
+  final int? number;
+  final String text;
+
+  /// Words/phrases the student answers about (usually translate orally).
+  final List<String> items;
+
+  /// Quranic snippets in which the student identifies/highlights a part.
+  final List<String> verses;
+}
+
+class QuranVerseBlock extends ContentBlock {
+  const QuranVerseBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    required this.text,
+    this.note,
+  });
+
+  final String text;
+  final String? note;
+}
+
+class BulletListBlock extends ContentBlock {
+  const BulletListBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    required this.items,
+  });
+
+  final List<String> items;
+}
+
+/// Fallback for block types this app version doesn't know about.
+class UnknownBlock extends ContentBlock {
+  const UnknownBlock({
+    required super.type,
+    required super.style,
+    super.highlight,
+    required this.raw,
+  });
+
+  final Map<String, dynamic> raw;
+
+  /// Every string found anywhere in the block, in document order.
+  List<String> get texts {
+    final out = <String>[];
+    void walk(dynamic v, String? key) {
+      if (key == 'type' || key == 'style') return;
+      if (v is String && v.isNotEmpty) {
+        out.add(v);
+      } else if (v is Map) {
+        v.forEach((k, e) => walk(e, k.toString()));
+      } else if (v is List) {
+        for (final e in v) {
+          walk(e, null);
+        }
+      }
+    }
+
+    walk(raw, null);
+    return out;
+  }
+}
