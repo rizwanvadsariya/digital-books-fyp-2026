@@ -376,4 +376,35 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get previewCaption => 'نمونہ';
+
+  @override
+  String volumeN(int number) {
+    return 'جلد $number';
+  }
+
+  @override
+  String unitsRange(String range) {
+    return 'یونٹ $range';
+  }
+
+  @override
+  String get modelPaper => 'ماڈل پیپر';
+
+  @override
+  String unitModelPaper(String unit) {
+    return 'یونٹ $unit · ماڈل پیپر';
+  }
+
+  @override
+  String get guidanceNotes => 'ہدایات';
+
+  @override
+  String sectionDataForVolume(int number) {
+    return 'آپ کا ڈیٹا · جلد $number';
+  }
+
+  @override
+  String marksN(int count) {
+    return '$count نمبر';
+  }
 }

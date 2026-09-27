@@ -5,11 +5,12 @@ import 'package:flutter/services.dart';
 
 import '../models/book.dart';
 
+/// Loads one volume's JSON. Every volume shares the same models and parser.
 class BookRepository {
-  BookRepository({AssetBundle? bundle}) : _bundle = bundle ?? rootBundle;
+  BookRepository({this.assetPath = 'assets/data/muallim_ul_quran_vol1_full.json', AssetBundle? bundle})
+      : _bundle = bundle ?? rootBundle;
 
-  static const assetPath = 'assets/data/muallim_ul_quran_vol1_full.json';
-
+  final String assetPath;
   final AssetBundle _bundle;
   Book? _cache;
 

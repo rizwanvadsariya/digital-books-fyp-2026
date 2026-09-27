@@ -1,22 +1,18 @@
 {
   "@@locale": "ur",
-
   "appTitle": "معلم القرآن",
   "navHome": "ہوم",
   "navContents": "فہرست",
   "navBookmarks": "بک مارکس",
   "navSearch": "تلاش",
-
   "continueReading": "پڑھنا جاری رکھیں",
   "startReading": "پڑھنا شروع کریں",
   "readFromStart": "شروع سے پڑھیں",
   "myAnswers": "میرے جوابات",
   "myAnswersCount": "میرے جوابات ({count})",
   "settings": "ترتیبات",
-
   "loadFailed": "کتاب لوڈ نہیں ہو سکی",
   "retry": "دوبارہ کوشش کریں",
-
   "unitN": "یونٹ {unit}",
   "lessonN": "سبق {lesson}",
   "unitLesson": "یونٹ {unit} · سبق {lesson}",
@@ -31,14 +27,12 @@
   "pagesCount": "{count, plural, =1{1 صفحہ} other{{count} صفحات}}",
   "lessonsCount": "{count, plural, =1{1 سبق} other{{count} اسباق}}",
   "totalPages": "کُل {count} صفحات",
-
   "chipFront": "مقدمہ",
   "chipExtra": "امتحان و فہرست",
   "chipPrinted": "کتاب کی فہرست",
   "sectionFront": "مقدمہ اور تعارف",
   "sectionExtra": "امتحان اور ضمیمہ",
   "sectionPrinted": "کتاب کی اصل فہرست",
-
   "addBookmark": "بک مارک لگائیں",
   "removeBookmark": "بک مارک ہٹائیں",
   "readingSettings": "پڑھنے کی ترتیبات",
@@ -46,11 +40,9 @@
   "nextPage": "اگلا صفحہ",
   "noBookmarksTitle": "ابھی کوئی بک مارک نہیں",
   "noBookmarksHint": "کسی صفحے پر اوپر بک مارک کا نشان دبائیں",
-
   "searchHint": "عربی لفظ، آیت یا اردو متن تلاش کریں",
   "searchResults": "{count, plural, =0{کوئی نتیجہ نہیں} other{{count} نتائج}}",
   "searchResultsMax": "200+ نتائج",
-
   "deleteAllAnswers": "سب جوابات مٹائیں",
   "deleteAllAnswersQuestion": "سب جوابات مٹائیں؟",
   "removeAllBookmarks": "سب بک مارک ہٹائیں",
@@ -63,7 +55,6 @@
   "noAnswersYet": "ابھی کوئی جواب محفوظ نہیں ہوا",
   "correctAnswerLabel": "درست جواب: ",
   "correctShort": "درست: {answer}",
-
   "hintMeaning": "مطلب",
   "hintTranslation": "ترجمہ",
   "hintWriteAnswer": "یہاں جواب لکھیں",
@@ -74,7 +65,6 @@
   "plural": "جمع",
   "listenRecitation": "تلاوت سنیں",
   "recitationComingSoon": "تلاوت کی آڈیو جلد شامل کی جائے گی۔",
-
   "keyboardArabic": "عربی",
   "keyboardUrdu": "اردو",
   "useArabicKeyboard": "عربی کی بورڈ",
@@ -90,7 +80,6 @@
   "harakaSukun": "جزم",
   "harakaAlef": "کھڑا زبر",
   "harakaTatweel": "کشیدہ",
-
   "pageColor": "صفحے کا رنگ",
   "themePaper": "کاغذ",
   "themeSepia": "سیپیا",
@@ -101,7 +90,6 @@
   "strictMatching": "سخت جانچ",
   "strictMatchingHint": "جواب چیک کرتے وقت اعراب (زبر، زیر، پیش) بھی ملائیں",
   "allSettings": "تمام ترتیبات",
-
   "sectionLanguage": "ایپ کی زبان",
   "languageHint": "صرف مینو، بٹن اور لیبل بدلیں گے۔ کتاب کا اپنا متن ہمیشہ اردو اور عربی میں رہے گا۔",
   "languageSystem": "سسٹم کے مطابق",
@@ -113,5 +101,12 @@
   "bookmarksSaved": "{count, plural, =0{کوئی بک مارک نہیں} other{{count} بک مارکس}}",
   "aboutBook": "معلم القرآن، جلد اوّل — قرآن کریم خود سمجھنے کا ایک آسان انداز اور جامع نظام۔",
   "licenses": "لائسنس",
-  "previewCaption": "نمونہ"
+  "previewCaption": "نمونہ",
+  "volumeN": "جلد {number}",
+  "unitsRange": "یونٹ {range}",
+  "modelPaper": "ماڈل پیپر",
+  "unitModelPaper": "یونٹ {unit} · ماڈل پیپر",
+  "guidanceNotes": "ہدایات",
+  "sectionDataForVolume": "آپ کا ڈیٹا · جلد {number}",
+  "marksN": "{count} نمبر"
 }

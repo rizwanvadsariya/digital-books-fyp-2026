@@ -6,6 +6,9 @@ import '../utils/arabic_text.dart';
 const arabicFont = 'Amiri';
 const urduFont = 'NotoNastaliqUrdu';
 
+/// Fallback for arrows and symbols the book fonts lack (e.g. ← in tables).
+const symbolsFont = 'BookSymbols';
+
 /// Colours and typography for rendering book pages. Installed as a
 /// [ThemeExtension] so every block widget can read it with [BookTheme.of].
 @immutable
@@ -115,7 +118,7 @@ class BookTheme extends ThemeExtension<BookTheme> {
     double height = 1.9,
   }) => TextStyle(
     fontFamily: arabicFont,
-    fontFamilyFallback: const [urduFont],
+    fontFamilyFallback: const [urduFont, symbolsFont],
     fontSize: size * fontScale,
     fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
     color: color ?? ink,
@@ -131,7 +134,7 @@ class BookTheme extends ThemeExtension<BookTheme> {
     double height = 2.15,
   }) => TextStyle(
     fontFamily: urduFont,
-    fontFamilyFallback: const [arabicFont],
+    fontFamilyFallback: const [arabicFont, symbolsFont],
     fontSize: size * fontScale,
     fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
     fontVariations: [FontVariation('wght', bold ? 700 : 400)],
@@ -238,8 +241,8 @@ ThemeData buildAppTheme(ReaderSettings settings) {
 /// Book pages set their own fonts through [BookTheme] and are unaffected.
 ThemeData withUiFont(ThemeData theme, {required bool urdu}) {
   TextTheme apply(TextTheme t) => urdu
-      ? t.apply(fontFamily: urduFont, fontFamilyFallback: const [arabicFont])
-      : t.apply(fontFamilyFallback: const [urduFont, arabicFont]);
+      ? t.apply(fontFamily: urduFont, fontFamilyFallback: const [arabicFont, symbolsFont])
+      : t.apply(fontFamilyFallback: const [urduFont, arabicFont, symbolsFont]);
   return theme.copyWith(
     textTheme: apply(theme.textTheme),
     primaryTextTheme: apply(theme.primaryTextTheme),

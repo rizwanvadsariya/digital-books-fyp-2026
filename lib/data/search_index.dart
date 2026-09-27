@@ -68,7 +68,7 @@ class SearchIndex {
         yield* b.items;
         yield* b.verses;
       case QuranVerseBlock b:
-        yield b.text;
+        yield* b.allVerses;
         if (b.note != null) yield b.note!;
       case BulletListBlock b:
         yield* b.items;

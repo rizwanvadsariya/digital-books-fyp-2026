@@ -27,7 +27,12 @@ class BookPageView extends StatelessWidget {
     final body = <(int, ContentBlock)>[];
     for (var i = 0; i < page.blocks.length; i++) {
       final b = page.blocks[i];
-      if (marker == null && b is TextBlock && _pinnedTypes.contains(b.type)) {
+      // A bare number (e.g. a unit cover's circle badge "5") isn't a useful
+      // header, so it stays inline and the header shows the page's label.
+      if (marker == null &&
+          b is TextBlock &&
+          _pinnedTypes.contains(b.type) &&
+          int.tryParse(b.text.trim()) == null) {
         marker = b;
       } else {
         body.add((i, b));
@@ -148,6 +153,8 @@ class _PageFooter extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         page.printedPage != null ? '— ${page.printedPage} —' : '— ${page.index + 1} / $total —',
+        // Numbers read left-to-right even on an RTL page ("43 / 115").
+        textDirection: TextDirection.ltr,
         style: TextStyle(color: theme.muted, fontSize: 12, fontFamily: arabicFont),
       ),
     );

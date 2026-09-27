@@ -159,6 +159,10 @@ class Book {
         return 'فہرست';
       case 'back_matter':
         return 'اختتامیہ';
+      case 'model_paper':
+        return page.unit != null ? 'یونٹ ${page.unit} · ماڈل پیپر' : 'ماڈل پیپر';
+      case 'guidance_notes':
+        return 'ہدایات';
     }
     return 'مقدمہ';
   }

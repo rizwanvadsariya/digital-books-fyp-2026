@@ -379,4 +379,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previewCaption => 'Preview';
+
+  @override
+  String volumeN(int number) {
+    return 'Volume $number';
+  }
+
+  @override
+  String unitsRange(String range) {
+    return 'Units $range';
+  }
+
+  @override
+  String get modelPaper => 'Model paper';
+
+  @override
+  String unitModelPaper(String unit) {
+    return 'Unit $unit · Model paper';
+  }
+
+  @override
+  String get guidanceNotes => 'Guidance notes';
+
+  @override
+  String sectionDataForVolume(int number) {
+    return 'Your data · Volume $number';
+  }
+
+  @override
+  String marksN(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marks',
+      one: '1 mark',
+    );
+    return '$_temp0';
+  }
 }

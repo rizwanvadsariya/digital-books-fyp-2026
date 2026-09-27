@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Flutter app (**Muallim-Ul-Quran**) that renders the Urdu/Arabic Quran-learning textbook *Muallim-ul-Quran, Volume 1* from `assets/data/muallim_ul_quran_vol1_full.json`. It provides a right-to-left, page-turning book reader, in-book exercises answered through an embedded Arabic/Urdu keyboard, and saved progress. State management is **flutter_bloc (Cubits)**. Persistence is **shared_preferences**. Do not introduce Riverpod or Hive.
+Flutter app (**Muallim-Ul-Quran**) that renders the Urdu/Arabic Quran-learning textbook *Muallim-ul-Quran* — Volume 1 (`assets/data/muallim_ul_quran_vol1_full.json`, units 1–3) and Volume 2 (`…_vol2_full.json`, units 4–5). It provides a right-to-left, page-turning book reader, in-book exercises answered through an embedded Arabic/Urdu keyboard, and saved progress. State management is **flutter_bloc (Cubits)**. Persistence is **shared_preferences**. Do not introduce Riverpod or Hive.
 
 ## Commands
 
@@ -20,6 +20,9 @@ flutter run -d macos    # or chrome / an emulator
 `test/widgets/render_all_pages_test.dart` pumps every page of the real JSON in normal and practice mode and fails on any layout exception. Run it after changing any block widget. Widget tests use Flutter's placeholder test font. To see real Arabic/Nastaliq rendering, load the fonts with `FontLoader` in a throwaway golden test and view the PNGs.
 
 ## Architecture
+
+- **Volumes:** `lib/data/volumes.dart` lists each volume's asset and storage namespace. All volumes share one parser, one set of models and one set of widgets. To add a volume, add its JSON to `assets/data/` and pubspec, then add an entry there. `LibraryCubit` holds the open volume. `main.dart` keeps a `VolumeSession` (Book/Progress/Answers Cubits) for each volume and provides the open one **above** `MaterialApp`, so every route sees it. `HomeShell` keys its tabs by volume id, so they rebuild on switch.
+- **Per-volume storage:** answer IDs and page indexes are only unique within a volume, so answers, progress and bookmarks go through `LocalStore.forVolume(namespace)`. Volume 1's namespace is `''`, which keeps the original keys and existing user data. Settings and the selected volume are app-wide.
 
 - `lib/models/content_block.dart`: a sealed `ContentBlock` hierarchy with a never-throwing `fromJson`. Text-like types (`heading`, `paragraph`, `note_box`, `instruction`, …) share one `TextBlock` model, distinguished by `type`. Structured types have their own classes. Unknown or malformed types become `UnknownBlock`, which renders every string it contains.
 - `lib/models/block_style.dart`: the `style` field is free-form (19 values). It is decoded **by token** (`red`, `bold`, `boxed`, `ornamental`, `black_badge`, …) rather than as an enum, so new combinations render without code changes.
@@ -39,10 +42,23 @@ flutter run -d macos    # or chrome / an emulator
   - The Urdu interface uses Nastaliq (`withUiFont`). The English interface keeps the platform font, with a Nastaliq fallback for embedded Urdu such as lesson titles.
 - Answer checking (`answerMatches`) is lenient by default: it ignores harakat, folds Arabic/Urdu letter variants, and accepts any `/`- or `،`-separated alternative. Strict mode requires exact harakat.
 
-## Data quirks (`assets/data/muallim_ul_quran_vol1_full.json`)
+## Data quirks
+
+Volume 1:
 
 - `columns` is an int layout hint on vocab and verse lists, but a list of header strings on tables.
 - Table `rows` are keyed by header text. Repeated headers are disambiguated only in the row keys (`مطلب`, `مطلب ۲`), so column order comes from the row keys (`TableBlock.keys`) and labels from `columns` (`TableBlock.headers`).
 - `vocab_pair_list` items are either `{pair, note}` or `{singular, plural, …meaning?}`. `question` blocks have `items` (words to answer) or `verses` (snippets to identify a part of).
 - The printed contents page (`page_kind: table_of_contents`) has `سبق/صفحہ/موضوع` rows. Tapping a row jumps to that printed page.
-- `↔`/`←` appear in the text but aren't in Amiri. They depend on the platform's fallback font.
+
+Volume 2 adds these shapes, all handled by the shared parser:
+- `quran_verse` with `items: [..]` instead of `text`: use `QuranVerseBlock.allVerses`.
+- `unit_summary_box` with `title` instead of `label`.
+- Two tables whose `rows` are **lists**, matched to `columns` by position using `#0…` keys; one column header is blank.
+- Row keys not in `columns` (`note`, `مطلب2`): see `TableBlock._headerFor`.
+- `question.marks` on model papers.
+- Page kinds `guidance_notes`, `model_paper`, `key_words`, `quranic_style`. The last two are lesson pages with the default layout.
+- One contents row has `صفحہ: null`.
+- Unit covers' `unit_marker` is just a number (circle badge). The page header pins only non-numeric markers.
+
+Glyphs: `←` (248 times) and `↔` (24 times) aren't in Amiri or Nastaliq. `assets/fonts/NotoSansMath-Arrows.ttf` (family `BookSymbols`, a U+2190–21FF subset) is in every book and interface font's fallback list. Draw decorative markers such as ◆ as shapes, not characters.

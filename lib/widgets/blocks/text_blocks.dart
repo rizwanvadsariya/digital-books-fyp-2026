@@ -97,7 +97,7 @@ class ProseBlockView extends StatelessWidget {
         );
       case 'list_item':
         return _Bulleted(
-          marker: b.number != null ? '${b.number}.' : '◆',
+          marker: b.number != null ? '${b.number}.' : null,
           child: ScriptText(b.text, size: 15, align: TextAlign.justify),
         );
       case 'signature_block':
@@ -203,7 +203,7 @@ class NoteBlockView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (b.text.isNotEmpty) ScriptText(b.text, size: 14.5, align: TextAlign.justify),
-              for (final item in b.items) _Bulleted(marker: '◆', child: ScriptText(item, size: 14.5, align: TextAlign.justify)),
+              for (final item in b.items) _Bulleted(marker: null, child: ScriptText(item, size: 14.5, align: TextAlign.justify)),
             ],
           ),
         );
@@ -246,7 +246,9 @@ class NoteBlockView extends StatelessWidget {
 class _Bulleted extends StatelessWidget {
   const _Bulleted({required this.marker, required this.child});
 
-  final String marker;
+  /// Text marker (e.g. "3." or "•"); `null` draws a red diamond. The diamond
+  /// is painted rather than typed because the book fonts lack a ◆ glyph.
+  final String? marker;
   final Widget child;
 
   @override
@@ -259,7 +261,17 @@ class _Bulleted extends StatelessWidget {
           width: 26,
           child: Padding(
             padding: const EdgeInsets.only(top: 6),
-            child: Text(marker, textAlign: TextAlign.center, style: TextStyle(color: book.red, fontSize: 14, fontWeight: FontWeight.bold)),
+            child: marker != null
+                ? Text(marker!, textAlign: TextAlign.center, style: TextStyle(color: book.red, fontSize: 14, fontWeight: FontWeight.bold))
+                : Padding(
+                    padding: const EdgeInsets.only(top: 7),
+                    child: Center(
+                      child: Transform.rotate(
+                        angle: 0.785398,
+                        child: Container(width: 7, height: 7, color: book.red),
+                      ),
+                    ),
+                  ),
           ),
         ),
         Expanded(child: child),

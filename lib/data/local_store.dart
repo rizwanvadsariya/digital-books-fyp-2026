@@ -4,17 +4,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/reader_settings.dart';
 
-/// All on-device persistence: answers, reading progress, bookmarks and
-/// reader settings, stored in shared_preferences.
+/// All on-device persistence, stored in shared_preferences.
+///
+/// Answers, reading progress and bookmarks belong to one volume and are
+/// stored under that volume's [namespace] (see [forVolume]). Settings and the
+/// selected volume are app-wide.
 class LocalStore {
-  LocalStore(this._prefs);
+  LocalStore(this._prefs, {this.namespace = ''});
 
   final SharedPreferences _prefs;
+  final String namespace;
 
-  static const _answersKey = 'answers.v1';
-  static const _lastPageKey = 'progress.lastPage';
-  static const _bookmarksKey = 'progress.bookmarks';
+  /// A store for one volume's data, sharing the same preferences.
+  LocalStore forVolume(String namespace) => LocalStore(_prefs, namespace: namespace);
+
+  String get _answersKey => '${namespace}answers.v1';
+  String get _lastPageKey => '${namespace}progress.lastPage';
+  String get _bookmarksKey => '${namespace}progress.bookmarks';
   static const _settingsKey = 'settings.v1';
+  static const _volumeKey = 'library.volume';
+
+  String? readSelectedVolume() => _prefs.getString(_volumeKey);
+
+  Future<void> writeSelectedVolume(String id) => _prefs.setString(_volumeKey, id);
 
   Map<String, String> readAnswers() {
     final raw = _prefs.getString(_answersKey);

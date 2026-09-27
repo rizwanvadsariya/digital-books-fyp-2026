@@ -709,6 +709,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preview'**
   String get previewCaption;
+
+  /// No description provided for @volumeN.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume {number}'**
+  String volumeN(int number);
+
+  /// No description provided for @unitsRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Units {range}'**
+  String unitsRange(String range);
+
+  /// No description provided for @modelPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Model paper'**
+  String get modelPaper;
+
+  /// No description provided for @unitModelPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit {unit} · Model paper'**
+  String unitModelPaper(String unit);
+
+  /// No description provided for @guidanceNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance notes'**
+  String get guidanceNotes;
+
+  /// No description provided for @sectionDataForVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data · Volume {number}'**
+  String sectionDataForVolume(int number);
+
+  /// No description provided for @marksN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 mark} other{{count} marks}}'**
+  String marksN(int count);
 }
 
 class _AppLocalizationsDelegate

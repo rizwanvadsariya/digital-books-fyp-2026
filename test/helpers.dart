@@ -14,12 +14,16 @@ import 'package:muallim_ul_quran/theme/book_theme.dart';
 import 'package:muallim_ul_quran/widgets/keyboard/keyboard_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Book? _book;
+final _books = <String, Book>{};
 
-/// The real book data, parsed once per test run.
-Book loadBook() => _book ??= Book.fromJson(
-      jsonDecode(File('assets/data/muallim_ul_quran_vol1_full.json').readAsStringSync()) as Map<String, dynamic>,
+/// A real volume's data (Volume 1 by default), parsed once per test run.
+Book loadBook([String path = 'assets/data/muallim_ul_quran_vol1_full.json']) => _books.putIfAbsent(
+      path,
+      () => Book.fromJson(jsonDecode(File(path).readAsStringSync()) as Map<String, dynamic>),
     );
+
+const vol1Path = 'assets/data/muallim_ul_quran_vol1_full.json';
+const vol2Path = 'assets/data/muallim_ul_quran_vol2_full.json';
 
 Future<LocalStore> freshStore([Map<String, Object> values = const {}]) async {
   SharedPreferences.setMockInitialValues(values);

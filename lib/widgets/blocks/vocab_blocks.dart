@@ -15,7 +15,12 @@ import '../exercise/answer_field.dart';
 /// meaning get an answer blank; in practice mode printed meanings are hidden
 /// and become self-check blanks too.
 class VocabListBlockView extends StatelessWidget {
-  const VocabListBlockView({super.key, required this.block, required this.pdfPage, required this.blockIndex});
+  const VocabListBlockView({
+    super.key,
+    required this.block,
+    required this.pdfPage,
+    required this.blockIndex,
+  });
 
   final VocabListBlock block;
   final int pdfPage;
@@ -24,7 +29,9 @@ class VocabListBlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
-    final practice = context.select<SettingsCubit, bool>((c) => c.state.practiceMode);
+    final practice = context.select<SettingsCubit, bool>(
+      (c) => c.state.practiceMode,
+    );
     return ResponsiveGrid(
       columns: block.columns,
       minCellWidth: 104,
@@ -45,7 +52,12 @@ class VocabListBlockView extends StatelessWidget {
 
 /// Singular/plural pairs, or Arabic phrases with their meaning.
 class VocabPairListBlockView extends StatelessWidget {
-  const VocabPairListBlockView({super.key, required this.block, required this.pdfPage, required this.blockIndex});
+  const VocabPairListBlockView({
+    super.key,
+    required this.block,
+    required this.pdfPage,
+    required this.blockIndex,
+  });
 
   final VocabPairListBlock block;
   final int pdfPage;
@@ -54,7 +66,9 @@ class VocabPairListBlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
-    final practice = context.select<SettingsCubit, bool>((c) => c.state.practiceMode);
+    final practice = context.select<SettingsCubit, bool>(
+      (c) => c.state.practiceMode,
+    );
     return ResponsiveGrid(
       columns: block.columns,
       minCellWidth: 130,
@@ -106,12 +120,34 @@ class _VocabCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          ScriptText(arabic, size: 16, align: TextAlign.center, color: arabicColor, forceScript: Script.arabic),
+          ScriptText(
+            arabic,
+            size: 16,
+            align: TextAlign.center,
+            color: arabicColor,
+            forceScript: Script.arabic,
+          ),
           if (showMeaning)
-            ScriptText(meaning!, size: 12.5, align: TextAlign.center, color: book.muted, forceScript: Script.urdu)
+            ScriptText(
+              meaning!,
+              size: 12.5,
+              align: TextAlign.center,
+              color: book.muted,
+              forceScript: Script.urdu,
+            )
           else
-            AnswerField(id: id, answerKey: meaning, hint: context.l10n.hintMeaning),
-          if (extra != null) ScriptText(extra!, size: 11.5, align: TextAlign.center, color: book.muted),
+            AnswerField(
+              id: id,
+              answerKey: meaning,
+              hint: context.l10n.hintMeaning,
+            ),
+          if (extra != null)
+            ScriptText(
+              extra!,
+              size: 11.5,
+              align: TextAlign.center,
+              color: book.muted,
+            ),
         ],
       ),
     );
@@ -127,17 +163,25 @@ class _SingularPluralCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget side(String? word, String? meaning, String label) => Expanded(
-          child: Column(
-            children: [
-              Text(
-                label,
-                style: uiTextStyle(context, size: 10, color: book.muted),
-              ),
-              ScriptText(word ?? '—', size: 15, align: TextAlign.center, forceScript: Script.arabic),
-              if (meaning != null) ScriptText(meaning, size: 11.5, color: book.muted, align: TextAlign.center),
-            ],
+      child: Column(
+        children: [
+          Text(label, style: uiTextStyle(context, size: 10, color: book.muted)),
+          ScriptText(
+            word ?? '—',
+            size: 15,
+            align: TextAlign.center,
+            forceScript: Script.arabic,
           ),
-        );
+          if (meaning != null)
+            ScriptText(
+              meaning,
+              size: 11.5,
+              color: book.muted,
+              align: TextAlign.center,
+            ),
+        ],
+      ),
+    );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -158,7 +202,13 @@ class _SingularPluralCard extends StatelessWidget {
               side(item.plural, item.pluralMeaning, context.l10n.plural),
             ],
           ),
-          if (item.note != null) ScriptText(item.note!, size: 11.5, color: book.muted, align: TextAlign.center),
+          if (item.note != null)
+            ScriptText(
+              item.note!,
+              size: 11.5,
+              color: book.muted,
+              align: TextAlign.center,
+            ),
         ],
       ),
     );

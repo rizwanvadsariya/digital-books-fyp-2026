@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/answers_cubit.dart';
+import '../blocs/library_cubit.dart';
 import '../blocs/progress_cubit.dart';
 import '../blocs/settings_cubit.dart';
 import '../l10n/l10n.dart';
@@ -34,7 +35,11 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           _Section(title: l.sectionExercises, icon: Icons.edit_note, child: const ExerciseControls()),
-          _Section(title: l.sectionData, icon: Icons.storage_outlined, child: const _DataControls()),
+          _Section(
+            title: l.sectionDataForVolume(context.watch<LibraryCubit>().state.number),
+            icon: Icons.storage_outlined,
+            child: const _DataControls(),
+          ),
           _Section(title: l.sectionAbout, icon: Icons.info_outline, child: const _About()),
         ],
       ),

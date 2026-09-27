@@ -44,6 +44,8 @@ class ScriptText extends StatelessWidget {
           fontSize: size * theme.fontScale,
           fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
           color: color ?? theme.ink,
+          // Symbol-only cells (e.g. "←") need the bundled symbols font.
+          fontFamilyFallback: const [urduFont, arabicFont, symbolsFont],
         ),
       );
     }

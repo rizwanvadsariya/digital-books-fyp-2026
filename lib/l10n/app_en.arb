@@ -1,54 +1,111 @@
 {
   "@@locale": "en",
-
   "appTitle": "Muallim-ul-Quran",
   "navHome": "Home",
   "navContents": "Contents",
   "navBookmarks": "Bookmarks",
   "navSearch": "Search",
-
   "continueReading": "Continue reading",
   "startReading": "Start reading",
   "readFromStart": "Read from the beginning",
   "myAnswers": "My answers",
   "myAnswersCount": "My answers ({count})",
-  "@myAnswersCount": {"placeholders": {"count": {"type": "int"}}},
+  "@myAnswersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "settings": "Settings",
-
   "loadFailed": "Couldn't load the book",
   "retry": "Try again",
-
   "unitN": "Unit {unit}",
-  "@unitN": {"placeholders": {"unit": {"type": "String"}}},
+  "@unitN": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "lessonN": "Lesson {lesson}",
-  "@lessonN": {"placeholders": {"lesson": {"type": "String"}}},
+  "@lessonN": {
+    "placeholders": {
+      "lesson": {
+        "type": "String"
+      }
+    }
+  },
   "unitLesson": "Unit {unit} · Lesson {lesson}",
-  "@unitLesson": {"placeholders": {"unit": {"type": "String"}, "lesson": {"type": "String"}}},
+  "@unitLesson": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      },
+      "lesson": {
+        "type": "String"
+      }
+    }
+  },
   "unitIntro": "Unit {unit} · Introduction",
-  "@unitIntro": {"placeholders": {"unit": {"type": "String"}}},
+  "@unitIntro": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "unitGeneric": "Unit",
   "sampleExam": "Sample exam",
   "tableOfContents": "Contents",
   "backMatter": "Closing notes",
   "introduction": "Introduction",
   "pageN": "Page {page}",
-  "@pageN": {"placeholders": {"page": {"type": "String"}}},
+  "@pageN": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
   "pageShort": "p. {page}",
-  "@pageShort": {"placeholders": {"page": {"type": "String"}}},
+  "@pageShort": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
   "pagesCount": "{count, plural, =1{1 page} other{{count} pages}}",
-  "@pagesCount": {"placeholders": {"count": {"type": "int"}}},
+  "@pagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "lessonsCount": "{count, plural, =1{1 lesson} other{{count} lessons}}",
-  "@lessonsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@lessonsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "totalPages": "{count} pages in total",
-  "@totalPages": {"placeholders": {"count": {"type": "int"}}},
-
+  "@totalPages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chipFront": "Introduction",
   "chipExtra": "Exam & index",
   "chipPrinted": "Book's contents",
   "sectionFront": "Introduction & preface",
   "sectionExtra": "Exam & appendix",
   "sectionPrinted": "The book's original contents",
-
   "addBookmark": "Add bookmark",
   "removeBookmark": "Remove bookmark",
   "readingSettings": "Reading settings",
@@ -56,12 +113,16 @@
   "nextPage": "Next page",
   "noBookmarksTitle": "No bookmarks yet",
   "noBookmarksHint": "Tap the bookmark icon at the top of any page",
-
   "searchHint": "Search Arabic words, verses or Urdu text",
   "searchResults": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
-  "@searchResults": {"placeholders": {"count": {"type": "int"}}},
+  "@searchResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "searchResultsMax": "200+ results",
-
   "deleteAllAnswers": "Delete all answers",
   "deleteAllAnswersQuestion": "Delete all answers?",
   "removeAllBookmarks": "Remove all bookmarks",
@@ -74,8 +135,13 @@
   "noAnswersYet": "No answers saved yet",
   "correctAnswerLabel": "Correct answer: ",
   "correctShort": "Correct: {answer}",
-  "@correctShort": {"placeholders": {"answer": {"type": "String"}}},
-
+  "@correctShort": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "hintMeaning": "Meaning",
   "hintTranslation": "Translation",
   "hintWriteAnswer": "Write your answer",
@@ -86,7 +152,6 @@
   "plural": "Plural",
   "listenRecitation": "Listen to recitation",
   "recitationComingSoon": "Recitation audio is coming soon.",
-
   "keyboardArabic": "Arabic",
   "keyboardUrdu": "Urdu",
   "useArabicKeyboard": "Arabic keyboard",
@@ -102,7 +167,6 @@
   "harakaSukun": "Sukun (jazm)",
   "harakaAlef": "Superscript alef",
   "harakaTatweel": "Tatweel",
-
   "pageColor": "Page color",
   "themePaper": "Paper",
   "themeSepia": "Sepia",
@@ -113,7 +177,6 @@
   "strictMatching": "Strict checking",
   "strictMatchingHint": "Harakat (zabar, zer, pesh) must also match when checking answers",
   "allSettings": "All settings",
-
   "sectionLanguage": "App language",
   "languageHint": "Changes menus, buttons and labels only. The book's own text always stays in Urdu and Arabic.",
   "languageSystem": "System default",
@@ -122,10 +185,64 @@
   "sectionData": "Your data",
   "sectionAbout": "About",
   "answersSaved": "{count, plural, =0{No answers saved} =1{1 answer saved} other{{count} answers saved}}",
-  "@answersSaved": {"placeholders": {"count": {"type": "int"}}},
+  "@answersSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "bookmarksSaved": "{count, plural, =0{No bookmarks} =1{1 bookmark} other{{count} bookmarks}}",
-  "@bookmarksSaved": {"placeholders": {"count": {"type": "int"}}},
+  "@bookmarksSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "aboutBook": "Muallim-ul-Quran, Volume 1 — an easy, complete system for understanding the Quran yourself.",
   "licenses": "Licenses",
-  "previewCaption": "Preview"
+  "previewCaption": "Preview",
+  "volumeN": "Volume {number}",
+  "@volumeN": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "unitsRange": "Units {range}",
+  "@unitsRange": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "modelPaper": "Model paper",
+  "unitModelPaper": "Unit {unit} · Model paper",
+  "@unitModelPaper": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "guidanceNotes": "Guidance notes",
+  "sectionDataForVolume": "Your data · Volume {number}",
+  "@sectionDataForVolume": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "marksN": "{count, plural, =1{1 mark} other{{count} marks}}",
+  "@marksN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

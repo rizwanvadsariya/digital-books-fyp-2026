@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muallim_ul_quran/data/book_repository.dart';
 import 'package:muallim_ul_quran/data/local_store.dart';
+import 'package:muallim_ul_quran/data/volumes.dart';
 import 'package:muallim_ul_quran/main.dart';
 import 'package:muallim_ul_quran/models/reader_settings.dart';
 import 'package:muallim_ul_quran/screens/home_shell.dart';
@@ -14,9 +15,12 @@ void main() {
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     final store = await freshStore(prefs);
-    final repository = BookRepository();
-    await tester.runAsync(repository.load); // warm the cache outside fake time
-    await tester.pumpWidget(MuallimApp(store: store, repository: repository));
+    // Warm each volume's cache outside fake time.
+    final repositories = {for (final v in bookVolumes) v.id: BookRepository(assetPath: v.assetPath)};
+    for (final r in repositories.values) {
+      await tester.runAsync(r.load);
+    }
+    await tester.pumpWidget(MuallimApp(store: store, repositoryFor: (v) => repositories[v.id]!));
     await tester.pumpAndSettle();
     expect(find.byType(HomeShell), findsOneWidget);
     return store;

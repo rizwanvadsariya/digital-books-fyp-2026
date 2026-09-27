@@ -62,11 +62,17 @@ class _AnswerFieldState extends State<AnswerField> {
   void _onChanged() => _answers.setAnswer(widget.id, _controller.text);
 
   void _onFocusChanged() {
-    if (_focusNode.hasFocus && _keyboard.state.activeId != widget.id) _activate();
+    if (_focusNode.hasFocus && _keyboard.state.activeId != widget.id)
+      _activate();
   }
 
   void _activate() {
-    _keyboard.attach(widget.id, _controller, _focusNode, preferred: widget.language);
+    _keyboard.attach(
+      widget.id,
+      _controller,
+      _focusNode,
+      preferred: widget.language,
+    );
     if (!_focusNode.hasFocus) _focusNode.requestFocus();
     // Wait for the docked keyboard to take its space, then bring the field
     // above it. Only the page's own (vertical) list is scrolled:
@@ -89,7 +95,11 @@ class _AnswerFieldState extends State<AnswerField> {
   void _check() {
     final key = widget.answerKey;
     if (key == null) return;
-    _answers.check(widget.id, key, strict: context.read<SettingsCubit>().state.strictMatching);
+    _answers.check(
+      widget.id,
+      key,
+      strict: context.read<SettingsCubit>().state.strictMatching,
+    );
   }
 
   @override
@@ -99,21 +109,27 @@ class _AnswerFieldState extends State<AnswerField> {
     final isArabic = widget.language == KeyboardLanguage.arabic;
     // Hints and labels are interface text: they follow the app language,
     // unlike the book content around them.
-    final textStyle = isArabic ? book.arabic(size: 20, height: 1.6) : book.urdu(size: 15, height: 1.9);
+    final textStyle = isArabic
+        ? book.arabic(size: 20, height: 1.6)
+        : book.urdu(size: 15, height: 1.9);
 
     return BlocListener<AnswersCubit, AnswersState>(
       listenWhen: (a, b) => a.answers[widget.id] != b.answers[widget.id],
       listener: (context, state) {
         // Keep in sync with external changes (e.g. "clear all answers").
         final stored = state.answers[widget.id] ?? '';
-        if (stored != _controller.text && !_focusNode.hasFocus) _controller.text = stored;
+        if (stored != _controller.text && !_focusNode.hasFocus)
+          _controller.text = stored;
       },
       child: BlocBuilder<KeyboardCubit, KeyboardState>(
         buildWhen: (a, b) =>
-            (a.activeId == widget.id) != (b.activeId == widget.id) || a.useNative != b.useNative,
+            (a.activeId == widget.id) != (b.activeId == widget.id) ||
+            a.useNative != b.useNative,
         builder: (context, kb) {
           final active = kb.activeId == widget.id;
-          final result = context.select<AnswersCubit, bool?>((c) => c.state.checks[widget.id]);
+          final result = context.select<AnswersCubit, bool?>(
+            (c) => c.state.checks[widget.id],
+          );
           final lineColor = switch (result) {
             true => book.correct,
             false => book.incorrect,
@@ -141,15 +157,25 @@ class _AnswerFieldState extends State<AnswerField> {
                       cursorColor: book.accent,
                       decoration: InputDecoration(
                         isDense: true,
-                        hintText: widget.hint ?? (isArabic ? l.hintWriteArabic : l.hintWriteAnswer),
-                        hintStyle: uiTextStyle(context, color: book.muted.withValues(alpha: 0.7)),
+                        hintText:
+                            widget.hint ??
+                            (isArabic ? l.hintWriteArabic : l.hintWriteAnswer),
+                        hintStyle: uiTextStyle(
+                          context,
+                          color: book.muted.withValues(alpha: 0.7),
+                        ),
                         contentPadding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
                         filled: active,
                         fillColor: book.accent.withValues(alpha: 0.08),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: lineColor, width: result == null ? 1 : 1.6),
+                          borderSide: BorderSide(
+                            color: lineColor,
+                            width: result == null ? 1 : 1.6,
+                          ),
                         ),
-                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: lineColor, width: 2)),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: lineColor, width: 2),
+                        ),
                         suffixIcon: active && kb.useNative
                             ? IconButton(
                                 tooltip: l.useArabicKeyboard,
@@ -157,7 +183,10 @@ class _AnswerFieldState extends State<AnswerField> {
                                 onPressed: () => _keyboard.setUseNative(false),
                               )
                             : null,
-                        suffixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                        suffixIconConstraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
                       ),
                     ),
                   ),
@@ -171,16 +200,26 @@ class _AnswerFieldState extends State<AnswerField> {
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: Text.rich(
-                    TextSpan(children: [
-                      TextSpan(
-                        text: l.correctAnswerLabel,
-                        style: uiTextStyle(context, size: 11, color: book.muted),
-                      ),
-                      TextSpan(
-                        text: widget.answerKey,
-                        style: book.forScript(dominantScript(widget.answerKey!), size: 12, color: book.correct),
-                      ),
-                    ]),
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: l.correctAnswerLabel,
+                          style: uiTextStyle(
+                            context,
+                            size: 11,
+                            color: book.muted,
+                          ),
+                        ),
+                        TextSpan(
+                          text: widget.answerKey,
+                          style: book.forScript(
+                            dominantScript(widget.answerKey!),
+                            size: 12,
+                            color: book.correct,
+                          ),
+                        ),
+                      ],
+                    ),
                     textDirection: TextDirection.rtl,
                   ),
                 ),

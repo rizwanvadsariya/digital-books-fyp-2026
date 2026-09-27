@@ -63,23 +63,35 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
     final book = context.read<BookCubit>().state.book!;
     final bookTheme = BookTheme.of(context);
     final l = context.l10n;
+    // Front matter: unit-less pages before the first unit (the printed
+    // contents page is listed with the extras instead).
+    final firstUnitPage = book.pages.indexWhere((p) => p.unit != null);
     final frontMatter = [
       for (final p in book.pages)
-        if (p.unit == null && p.pageKind == null) p,
+        if (p.unit == null &&
+            (firstUnitPage < 0 || p.index < firstUnitPage) &&
+            p.pageKind != 'unit_cover' &&
+            p.pageKind != 'table_of_contents')
+          p,
     ];
+    // Extras: special pages (exam, model paper, contents…) that aren't part
+    // of a lesson. Lesson pages with a kind (e.g. key_words) stay in their
+    // lesson.
     final extras = [
       for (final p in book.pages)
         if (p.pageKind != null &&
+            !p.isLessonPage &&
             p.pageKind != 'unit_cover' &&
-            p.pageKind != 'pre_lesson')
+            p.pageKind != 'pre_lesson' &&
+            !frontMatter.contains(p))
           p,
     ];
     final printedToc = book.firstPageOfKind('table_of_contents');
 
     final chips = <(String, String)>[
-      ('front', l.chipFront),
+      if (frontMatter.isNotEmpty) ('front', l.chipFront),
       for (final u in book.units) ('unit${u.unit}', l.unitN('${u.unit}')),
-      ('extra', l.chipExtra),
+      if (extras.isNotEmpty) ('extra', l.chipExtra),
       if (printedToc != null) ('printed', l.chipPrinted),
     ];
 
@@ -109,7 +121,8 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _SectionHeader(key: _key('front'), title: l.sectionFront),
+                if (frontMatter.isNotEmpty)
+                  _SectionHeader(key: _key('front'), title: l.sectionFront),
                 for (final p in frontMatter)
                   _PageTile(
                     title: _pageTitle(p) ?? l.pageN('${p.index + 1}'),
@@ -134,7 +147,8 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
                       onTap: () => widget.onOpen(lesson.firstPageIndex),
                     ),
                 ],
-                _SectionHeader(key: _key('extra'), title: l.sectionExtra),
+                if (extras.isNotEmpty)
+                  _SectionHeader(key: _key('extra'), title: l.sectionExtra),
                 for (final p in extras)
                   _PageTile(
                     title: pageLocation(l, p),

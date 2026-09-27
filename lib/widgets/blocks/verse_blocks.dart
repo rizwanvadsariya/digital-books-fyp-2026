@@ -34,13 +34,14 @@ class QuranVerseBlockView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ScriptText(block.text, size: 18, align: TextAlign.center, forceScript: Script.arabic),
+                  for (final verse in block.allVerses)
+                    ScriptText(verse, size: 18, align: TextAlign.center, forceScript: Script.arabic),
                   if (block.note != null)
                     ScriptText(block.note!, size: 12.5, color: book.muted, align: TextAlign.center),
                 ],
               ),
             ),
-            RecitationButton(verse: block.text),
+            RecitationButton(verse: block.allVerses.join('\n')),
           ],
         ),
       ),

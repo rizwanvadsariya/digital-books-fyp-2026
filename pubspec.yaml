@@ -64,8 +64,10 @@ flutter:
 
   assets:
     - assets/data/muallim_ul_quran_vol1_full.json
+    - assets/data/muallim_ul_quran_vol2_full.json
     - assets/fonts/OFL-Amiri.txt
     - assets/fonts/OFL-NotoNastaliqUrdu.txt
+    - assets/fonts/OFL-NotoSansMath.txt
 
   fonts:
     - family: Amiri
@@ -76,6 +78,11 @@ flutter:
     - family: NotoNastaliqUrdu
       fonts:
         - asset: assets/fonts/NotoNastaliqUrdu.ttf
+    # Arrows (← ↔) and ◆ used in the book text, missing from Amiri/Nastaliq.
+    # A U+2190–21FF subset of Noto Sans Math.
+    - family: BookSymbols
+      fonts:
+        - asset: assets/fonts/NotoSansMath-Arrows.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

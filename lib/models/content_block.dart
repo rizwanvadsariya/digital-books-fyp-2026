@@ -123,6 +123,7 @@ sealed class ContentBlock {
             text: _str(json['text']) ?? '',
             items: _strList(json['items']),
             verses: _strList(json['verses']),
+            marks: _int(json['marks']),
           );
         case 'quran_verse':
           return QuranVerseBlock(
@@ -131,6 +132,8 @@ sealed class ContentBlock {
             highlight: highlight,
             text: _str(json['text']) ?? '',
             note: _str(json['note']),
+            // Volume 2 groups several verses in one block as `items`.
+            verses: _strList(json['items']),
           );
         case 'bullet_list':
           return BulletListBlock(
@@ -147,7 +150,8 @@ sealed class ContentBlock {
           highlight: highlight,
           text: _str(json['text']) ?? '',
           number: _int(json['number']),
-          label: _str(json['label']),
+          // Volume 2's unit_summary_box names its heading `title`.
+          label: _str(json['label']) ?? _str(json['title']),
           date: _str(json['date']),
           bullet: json['bullet'] == true,
           items: _strList(json['items']),
@@ -295,17 +299,29 @@ class TableBlock extends ContentBlock {
     required BlockStyle style,
     required bool highlight,
   }) {
-    final rawRows = _mapList(json['rows']);
+    final columns = [
+      for (final c in (json['columns'] is List ? json['columns'] as List : const [])) c?.toString() ?? '',
+    ];
+    // Rows are usually maps keyed by header; a few (Volume 2) are plain lists
+    // matched to `columns` by position. Positional keys keep blank or
+    // repeated headers distinct.
+    final rowsJson = json['rows'] is List ? json['rows'] as List : const [];
+    final rawRows = <Map<String, dynamic>>[
+      for (final r in rowsJson)
+        if (r is Map)
+          Map<String, dynamic>.from(r)
+        else if (r is List)
+          {for (var i = 0; i < r.length; i++) '#$i': r[i]},
+    ];
     final keys = <String>[];
     for (final r in rawRows) {
       for (final k in r.keys) {
         if (!keys.contains(k)) keys.add(k);
       }
     }
-    final columns = _strList(json['columns']);
     final headers = [
       for (var i = 0; i < keys.length; i++)
-        columns.length == keys.length ? columns[i] : keys[i],
+        columns.length == keys.length ? columns[i] : _headerFor(keys[i], keys, columns, i),
     ];
     final isLabelText = keys.length == 2 && keys.contains('label') && keys.contains('text');
     return TableBlock(
@@ -321,6 +337,20 @@ class TableBlock extends ContentBlock {
       name: _str(json['name']),
       showHeader: !isLabelText,
     );
+  }
+
+  /// Display header for a row key when `columns` doesn't line up with the
+  /// keys: positional keys use the printed column, a disambiguated duplicate
+  /// (`مطلب2`, `مطلب ۲`) shows its base header, and `note` shows no header.
+  static String _headerFor(String key, List<String> keys, List<String> columns, int index) {
+    if (key.startsWith('#')) {
+      final i = int.tryParse(key.substring(1));
+      return i != null && i < columns.length ? columns[i] : '';
+    }
+    if (key == 'note') return '';
+    final base = key.replaceFirst(RegExp(r'\s*[0-9۰-۹٠-٩]+$'), '');
+    if (base != key && keys.contains(base)) return base;
+    return key;
   }
 
   final List<String> keys;
@@ -340,10 +370,14 @@ class QuestionBlock extends ContentBlock {
     required this.text,
     this.items = const [],
     this.verses = const [],
+    this.marks,
   });
 
   final int? number;
   final String text;
+
+  /// Marks awarded, on model-paper questions.
+  final int? marks;
 
   /// Words/phrases the student answers about (usually translate orally).
   final List<String> items;
@@ -359,10 +393,17 @@ class QuranVerseBlock extends ContentBlock {
     super.highlight,
     required this.text,
     this.note,
+    this.verses = const [],
   });
 
   final String text;
   final String? note;
+
+  /// Several verses in one block (Volume 2 uses `items` for this).
+  final List<String> verses;
+
+  /// Every verse in the block, whichever form the data used.
+  List<String> get allVerses => [if (text.isNotEmpty) text, ...verses];
 }
 
 class BulletListBlock extends ContentBlock {

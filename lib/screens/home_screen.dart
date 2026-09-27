@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/answers_cubit.dart';
 import '../blocs/book_cubit.dart';
+import '../blocs/library_cubit.dart';
 import '../blocs/progress_cubit.dart';
+import '../data/volumes.dart';
 import '../l10n/l10n.dart';
 import '../models/content_block.dart';
 import '../theme/book_theme.dart';
@@ -27,6 +29,7 @@ class HomeScreen extends StatelessWidget {
     final theme = BookTheme.of(context);
     final last = progress.lastPageIndex;
     final l = context.l10n;
+    final volume = context.watch<LibraryCubit>().state;
 
     String? tagline;
     for (final p in book.pages) {
@@ -41,7 +44,13 @@ class HomeScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          _Cover(tagline: tagline, onTap: () => openReader(context, last ?? 0)),
+          const _VolumeShelf(),
+          const SizedBox(height: 12),
+          _Cover(
+            volume: volume,
+            tagline: tagline,
+            onTap: () => openReader(context, last ?? 0),
+          ),
           const SizedBox(height: 16),
           if (last != null)
             Card(
@@ -136,9 +145,89 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _Cover extends StatelessWidget {
-  const _Cover({required this.tagline, required this.onTap});
+/// Volume picker: one mini cover per volume; the open one is highlighted.
+class _VolumeShelf extends StatelessWidget {
+  const _VolumeShelf();
 
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final current = context.watch<LibraryCubit>().state;
+    const gold = Color(0xFFE6C77A);
+    return Row(
+      children: [
+        for (final v in bookVolumes) ...[
+          if (v != bookVolumes.first) const SizedBox(width: 10),
+          Expanded(
+            child: Material(
+              color: v == current
+                  ? const Color(0xFF7A1F1A)
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => context.read<LibraryCubit>().select(v),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: v == current ? gold : Colors.transparent,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        v == current ? Icons.menu_book : Icons.book_outlined,
+                        color: v == current ? gold : null,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l.volumeN(v.number),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: v == current ? Colors.white : null,
+                              ),
+                            ),
+                            Text(
+                              // Isolate the numeric range so RTL text doesn't read "4–5" as "5–4".
+                              l.unitsRange('\u2066${v.units}\u2069'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: v == current ? Colors.white70 : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _Cover extends StatelessWidget {
+  const _Cover({
+    required this.volume,
+    required this.tagline,
+    required this.onTap,
+  });
+
+  final BookVolume volume;
   final String? tagline;
   final VoidCallback onTap;
 
@@ -184,9 +273,9 @@ class _Cover extends StatelessWidget {
                         height: 1.6,
                       ),
                     ),
-                    const Text(
-                      'جلد اوّل',
-                      style: TextStyle(
+                    Text(
+                      volume.coverSubtitle,
+                      style: const TextStyle(
                         fontFamily: urduFont,
                         fontSize: 16,
                         color: Colors.white,

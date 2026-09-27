@@ -50,6 +50,19 @@ class QuestionBlockView extends StatelessWidget {
                   ),
                 ),
               Expanded(child: ScriptText(block.text, size: 15, bold: true)),
+              if (block.marks != null)
+                Container(
+                  margin: const EdgeInsetsDirectional.only(start: 8, top: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: book.red),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    context.l10n.marksN(block.marks!),
+                    style: uiTextStyle(context, size: 11, color: book.red),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 6),

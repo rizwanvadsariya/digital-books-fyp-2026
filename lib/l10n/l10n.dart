@@ -27,6 +27,11 @@ String pageLocation(AppLocalizations l, BookPage page) {
       return l.tableOfContents;
     case 'back_matter':
       return l.backMatter;
+    case 'model_paper':
+      return page.unit != null ? l.unitModelPaper('${page.unit}') : l.modelPaper;
+    case 'guidance_notes':
+      return l.guidanceNotes;
+    // Any other kind (e.g. a future one) falls through to the generic label.
   }
   return l.introduction;
 }
