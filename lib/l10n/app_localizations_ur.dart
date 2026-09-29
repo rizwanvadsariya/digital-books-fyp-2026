@@ -405,6 +405,35 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String marksN(int count) {
-    return '$count نمبر';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نمبر',
+      one: '1 نمبر',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String get pressBackAgainToExit => 'باہر نکلنے کے لیے دوبارہ دبائیں';
+
+  @override
+  String get clearSearch => 'تلاش صاف کریں';
+
+  @override
+  String get searchSuggested => 'تجویز کردہ الفاظ';
+
+  @override
+  String get searchPromptTitle => 'کتاب میں تلاش کریں';
+
+  @override
+  String get searchPromptSubtitle =>
+      'عربی الفاظ، قرآنی آیات، ترجمہ اور عنوانات تلاش کریں';
+
+  @override
+  String get searchNoResultsTitle => 'کوئی نتیجہ نہیں ملا';
+
+  @override
+  String get searchNoResultsSubtitle =>
+      'اعراب کے بغیر یا مختلف ہجے کے ساتھ تلاش کر کے دیکھیں';
 }

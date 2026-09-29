@@ -18,7 +18,8 @@ class BookmarksScreen extends StatelessWidget {
     final book = context.read<BookCubit>().state.book!;
     final theme = BookTheme.of(context);
     final l = context.l10n;
-    final bookmarks = context.select<ProgressCubit, List<int>>((c) => c.state.bookmarks.toList()..sort());
+    final bookmarkSet = context.select<ProgressCubit, Set<int>>((c) => c.state.bookmarks);
+    final bookmarks = bookmarkSet.toList()..sort();
 
     if (bookmarks.isEmpty) {
       return Center(

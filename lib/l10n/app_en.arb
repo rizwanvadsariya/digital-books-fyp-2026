@@ -244,5 +244,12 @@
         "type": "int"
       }
     }
-  }
+  },
+  "pressBackAgainToExit": "Press back again to exit",
+  "clearSearch": "Clear search",
+  "searchSuggested": "Suggested searches",
+  "searchPromptTitle": "Search the book",
+  "searchPromptSubtitle": "Find Arabic vocabulary, Quranic verses, translation and topics",
+  "searchNoResultsTitle": "No matches found",
+  "searchNoResultsSubtitle": "Try searching without diacritics or checking spelling"
 }

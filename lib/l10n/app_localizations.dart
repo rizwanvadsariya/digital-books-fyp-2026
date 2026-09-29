@@ -751,6 +751,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 mark} other{{count} marks}}'**
   String marksN(int count);
+
+  /// No description provided for @pressBackAgainToExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Press back again to exit'**
+  String get pressBackAgainToExit;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @searchSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested searches'**
+  String get searchSuggested;
+
+  /// No description provided for @searchPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the book'**
+  String get searchPromptTitle;
+
+  /// No description provided for @searchPromptSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Arabic vocabulary, Quranic verses, translation and topics'**
+  String get searchPromptSubtitle;
+
+  /// No description provided for @searchNoResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches found'**
+  String get searchNoResultsTitle;
+
+  /// No description provided for @searchNoResultsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try searching without diacritics or checking spelling'**
+  String get searchNoResultsSubtitle;
 }
 
 class _AppLocalizationsDelegate

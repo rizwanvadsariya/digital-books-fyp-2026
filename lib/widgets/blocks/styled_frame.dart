@@ -79,7 +79,7 @@ class StyledFrame extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 6, left: 8),
+                    padding: const EdgeInsetsDirectional.only(top: 6, end: 8),
                     child: Icon(Icons.error_outline, color: book.red, size: 22),
                   ),
                   Expanded(child: child),

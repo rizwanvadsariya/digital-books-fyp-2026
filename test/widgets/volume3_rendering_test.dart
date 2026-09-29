@@ -55,8 +55,9 @@ void main() {
       void walk(InlineSpan span, TextStyle? inherited) {
         final style = inherited?.merge(span.style) ?? span.style;
         if (span is TextSpan) {
-          if ((span.text ?? '').trim().isNotEmpty && style != null)
+          if ((span.text ?? '').trim().isNotEmpty && style != null) {
             styles.add(style);
+          }
           for (final c in span.children ?? const <InlineSpan>[]) {
             walk(c, style);
           }

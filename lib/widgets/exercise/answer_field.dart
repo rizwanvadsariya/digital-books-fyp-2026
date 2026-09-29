@@ -65,8 +65,9 @@ class _AnswerFieldState extends State<AnswerField> {
   void _onChanged() => _answers.setAnswer(widget.id, _controller.text);
 
   void _onFocusChanged() {
-    if (_focusNode.hasFocus && _keyboard.state.activeId != widget.id)
+    if (_focusNode.hasFocus && _keyboard.state.activeId != widget.id) {
       _activate();
+    }
   }
 
   void _activate() {
@@ -121,8 +122,9 @@ class _AnswerFieldState extends State<AnswerField> {
       listener: (context, state) {
         // Keep in sync with external changes (e.g. "clear all answers").
         final stored = state.answers[widget.id] ?? '';
-        if (stored != _controller.text && !_focusNode.hasFocus)
+        if (stored != _controller.text && !_focusNode.hasFocus) {
           _controller.text = stored;
+        }
       },
       child: BlocBuilder<KeyboardCubit, KeyboardState>(
         buildWhen: (a, b) =>

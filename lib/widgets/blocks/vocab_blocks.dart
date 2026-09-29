@@ -205,7 +205,7 @@ class _SingularPluralCard extends StatelessWidget {
               side(item.singular, item.singularMeaning, context.l10n.singular),
               Padding(
                 padding: const EdgeInsets.only(top: 22),
-                child: Icon(Icons.arrow_forward, size: 16, color: book.red),
+                child: Icon(Icons.arrow_back, size: 16, color: book.red),
               ),
               side(item.plural, item.pluralMeaning, context.l10n.plural),
             ],

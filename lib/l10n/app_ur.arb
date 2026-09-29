@@ -108,5 +108,12 @@
   "unitModelPaper": "یونٹ {unit} · ماڈل پیپر",
   "guidanceNotes": "ہدایات",
   "sectionDataForVolume": "آپ کا ڈیٹا · جلد {number}",
-  "marksN": "{count} نمبر"
+  "marksN": "{count, plural, =1{1 نمبر} other{{count} نمبر}}",
+  "pressBackAgainToExit": "باہر نکلنے کے لیے دوبارہ دبائیں",
+  "clearSearch": "تلاش صاف کریں",
+  "searchSuggested": "تجویز کردہ الفاظ",
+  "searchPromptTitle": "کتاب میں تلاش کریں",
+  "searchPromptSubtitle": "عربی الفاظ، قرآنی آیات، ترجمہ اور عنوانات تلاش کریں",
+  "searchNoResultsTitle": "کوئی نتیجہ نہیں ملا",
+  "searchNoResultsSubtitle": "اعراب کے بغیر یا مختلف ہجے کے ساتھ تلاش کر کے دیکھیں"
 }

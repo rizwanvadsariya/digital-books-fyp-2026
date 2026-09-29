@@ -40,13 +40,65 @@ class HeadingBlockView extends StatelessWidget {
     if (b.style.large) size *= 1.12;
     final centered = b.style.centered || b.type != 'subheading';
     final text = b.number != null ? '${b.number}. ${b.text}' : b.text;
+    if (b.style.circleBadge && text.trim().length > 3) {
+      final numMatch = RegExp(r'^(\d+|[\u0660-\u0669]+)')
+          .firstMatch(text.trim());
+      if (numMatch != null) {
+        final numberStr = numMatch.group(1)!;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: book.red,
+                  boxShadow: [
+                    BoxShadow(
+                      color: book.red.withValues(alpha: 0.3),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: ScriptText(
+                    numberStr,
+                    size: 18,
+                    bold: true,
+                    color: Colors.white,
+                    align: TextAlign.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              ScriptText(
+                text,
+                size: size,
+                bold: true,
+                color: book.red,
+                align: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
     return StyledFrame(
       style: b.style,
       child: ScriptText(
         text,
         size: size,
         bold: true,
-        color: _textColor(book, b, fallback: b.type == 'subheading' ? book.red : null),
+        color: _textColor(
+          book,
+          b,
+          fallback: b.type == 'subheading' ? book.red : null,
+        ),
         align: centered ? TextAlign.center : TextAlign.start,
       ),
     );
@@ -62,14 +114,18 @@ class MarkerBlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
-    final style = block.style.raw == null ? BlockStylePresets.blackBadge : block.style;
+    final style = block.style.raw == null
+        ? BlockStylePresets.blackBadge
+        : block.style;
     return StyledFrame(
       style: style,
       child: ScriptText(
         block.text,
         size: block.type == 'unit_marker' ? 18 : 14,
         bold: true,
-        color: style.blackBadge ? book.badgeFg : (style.red ? book.red : book.ink),
+        color: style.blackBadge
+            ? book.badgeFg
+            : (style.red ? book.red : book.ink),
         align: TextAlign.center,
       ),
     );
@@ -89,7 +145,12 @@ class ProseBlockView extends StatelessWidget {
     final b = block;
     switch (b.type) {
       case 'tagline':
-        return ScriptText(b.text, size: 14, color: book.muted, align: TextAlign.center);
+        return ScriptText(
+          b.text,
+          size: 14,
+          color: book.muted,
+          align: TextAlign.center,
+        );
       case 'translation_line':
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -107,14 +168,20 @@ class ProseBlockView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               ScriptText(b.text, size: 15, bold: true),
-              if (b.date != null) ScriptText(b.date!, size: 13, color: book.muted),
+              if (b.date != null)
+                ScriptText(b.date!, size: 13, color: book.muted),
             ],
           ),
         );
       case 'copyright_notice':
         return StyledFrame(
           style: b.style,
-          child: ScriptText(b.text, size: 12, color: book.muted, align: TextAlign.center),
+          child: ScriptText(
+            b.text,
+            size: 12,
+            color: book.muted,
+            align: TextAlign.center,
+          ),
         );
     }
     return StyledFrame(
@@ -132,7 +199,12 @@ class ProseBlockView extends StatelessWidget {
 
 /// note, note_box, highlight, unit_summary_box, instruction.
 class NoteBlockView extends StatelessWidget {
-  const NoteBlockView({super.key, required this.block, required this.pdfPage, required this.blockIndex});
+  const NoteBlockView({
+    super.key,
+    required this.block,
+    required this.pdfPage,
+    required this.blockIndex,
+  });
 
   final TextBlock block;
   final int pdfPage;
@@ -151,7 +223,9 @@ class NoteBlockView extends StatelessWidget {
           color: b.style.red ? book.red : null,
           align: TextAlign.justify,
         );
-        return b.bullet ? _Bulleted(marker: '•', child: text) : StyledFrame(style: b.style, child: text);
+        return b.bullet
+            ? _Bulleted(marker: '•', child: text)
+            : StyledFrame(style: b.style, child: text);
 
       case 'note_box':
         return AccentCard(
@@ -164,7 +238,9 @@ class NoteBlockView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsetsDirectional.only(end: 8, top: 8),
                 child: Icon(
-                  b.style.exclamation ? Icons.error_outline : Icons.lightbulb_outline,
+                  b.style.exclamation
+                      ? Icons.error_outline
+                      : Icons.lightbulb_outline,
                   size: 20,
                   color: b.style.red ? book.red : book.accent,
                 ),
@@ -202,8 +278,13 @@ class NoteBlockView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (b.text.isNotEmpty) ScriptText(b.text, size: 14.5, align: TextAlign.justify),
-              for (final item in b.items) _Bulleted(marker: null, child: ScriptText(item, size: 14.5, align: TextAlign.justify)),
+              if (b.text.isNotEmpty)
+                ScriptText(b.text, size: 14.5, align: TextAlign.justify),
+              for (final item in b.items)
+                _Bulleted(
+                  marker: null,
+                  child: ScriptText(item, size: 14.5, align: TextAlign.justify),
+                ),
             ],
           ),
         );
@@ -234,7 +315,11 @@ class NoteBlockView extends StatelessWidget {
             ),
             if (b.items.isNotEmpty) ...[
               const SizedBox(height: 8),
-              WordAnswerGrid(words: b.items, pdfPage: pdfPage, blockIndex: blockIndex),
+              WordAnswerGrid(
+                words: b.items,
+                pdfPage: pdfPage,
+                blockIndex: blockIndex,
+              ),
             ],
           ],
         );
@@ -262,7 +347,15 @@ class _Bulleted extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: 6),
             child: marker != null
-                ? Text(marker!, textAlign: TextAlign.center, style: TextStyle(color: book.red, fontSize: 14, fontWeight: FontWeight.bold))
+                ? Text(
+                    marker!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: book.red,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
                 : Padding(
                     padding: const EdgeInsets.only(top: 7),
                     child: Center(
@@ -281,7 +374,11 @@ class _Bulleted extends StatelessWidget {
 }
 
 class _LabelledBox extends StatelessWidget {
-  const _LabelledBox({required this.label, required this.color, required this.child});
+  const _LabelledBox({
+    required this.label,
+    required this.color,
+    required this.child,
+  });
 
   final String? label;
   final Color color;
@@ -303,7 +400,10 @@ class _LabelledBox extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 0,
+                ),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: const BorderRadiusDirectional.only(
@@ -311,10 +411,18 @@ class _LabelledBox extends StatelessWidget {
                     bottomEnd: Radius.circular(10),
                   ),
                 ),
-                child: ScriptText(label!, size: 13, bold: true, color: Colors.white),
+                child: ScriptText(
+                  label!,
+                  size: 13,
+                  bold: true,
+                  color: Colors.white,
+                ),
               ),
             ),
-          Padding(padding: const EdgeInsets.fromLTRB(12, 6, 12, 10), child: child),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
+            child: child,
+          ),
         ],
       ),
     );

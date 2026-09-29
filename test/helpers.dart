@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 final _books = <String, Book>{};
 
 /// A real volume's data (Volume 1 by default), parsed once per test run.
-Book loadBook([String path = 'assets/data/fehm_e_quran_vol1_full.json']) =>
+Book loadBook([String path = 'assets/data/muallim_ul_quran_vol1_full.json']) =>
     _books.putIfAbsent(
       path,
       () => Book.fromJson(
@@ -25,9 +25,9 @@ Book loadBook([String path = 'assets/data/fehm_e_quran_vol1_full.json']) =>
       ),
     );
 
-const vol1Path = 'assets/data/fehm_e_quran_vol1_full.json';
-const vol2Path = 'assets/data/fehm_e_quran_vol2_full.json';
-const vol3Path = 'assets/data/fehm_e_quran_vol3_full.json';
+const vol1Path = 'assets/data/muallim_ul_quran_vol1_full.json';
+const vol2Path = 'assets/data/muallim_ul_quran_vol2_full.json';
+const vol3Path = 'assets/data/muallim_ul_quran_vol3_full.json';
 
 Future<LocalStore> freshStore([Map<String, Object> values = const {}]) async {
   SharedPreferences.setMockInitialValues(values);

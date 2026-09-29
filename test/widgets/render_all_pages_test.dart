@@ -58,8 +58,9 @@ void main() {
             collect();
             for (var i = 0; i < 60; i++) {
               final state = tester.state<ScrollableState>(scrollable);
-              if (state.position.pixels >= state.position.maxScrollExtent)
+              if (state.position.pixels >= state.position.maxScrollExtent) {
                 break;
+              }
               state.position.jumpTo(state.position.pixels + 500);
               await tester.pump();
               collect();

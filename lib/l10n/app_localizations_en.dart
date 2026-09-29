@@ -416,4 +416,27 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get pressBackAgainToExit => 'Press back again to exit';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get searchSuggested => 'Suggested searches';
+
+  @override
+  String get searchPromptTitle => 'Search the book';
+
+  @override
+  String get searchPromptSubtitle =>
+      'Find Arabic vocabulary, Quranic verses, translation and topics';
+
+  @override
+  String get searchNoResultsTitle => 'No matches found';
+
+  @override
+  String get searchNoResultsSubtitle =>
+      'Try searching without diacritics or checking spelling';
 }

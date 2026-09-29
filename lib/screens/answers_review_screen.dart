@@ -117,7 +117,10 @@ class _AnswerRow extends StatelessWidget {
           if (correct == false)
             Text.rich(TextSpan(children: [
               TextSpan(text: context.l10n.correctAnswerLabel, style: TextStyle(fontSize: 12, color: theme.muted)),
-              WidgetSpan(child: ScriptText(key!, size: 12, color: theme.correct)),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: ScriptText(key!, size: 12, color: theme.correct),
+              ),
             ])),
         ],
       ),

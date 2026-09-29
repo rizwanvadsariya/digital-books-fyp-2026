@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/book_cubit.dart';
@@ -21,41 +22,76 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
+  DateTime? _lastBackPress;
 
   @override
   Widget build(BuildContext context) {
     void open(int i) => openReader(context, i);
     final l = context.l10n;
     final titles = [l.appTitle, l.navContents, l.navBookmarks, l.navSearch];
-    return Scaffold(
-      appBar: _tab == 0 ? null : AppBar(title: Text(titles[_tab])),
-      body: _VolumeGate(
-        // Keyed by volume so every tab (search index, contents…) is rebuilt
-        // for the newly selected volume.
-        builder: (volumeId) => IndexedStack(
-          key: ValueKey(volumeId),
-          index: _tab,
-          children: [
-            HomeScreen(onShowContents: () => setState(() => _tab = 1)),
-            TableOfContentsView(onOpen: open),
-            BookmarksScreen(onOpen: open),
-            SearchScreen(onOpen: open),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_tab != 0) {
+          setState(() {
+            _tab = 0;
+            _lastBackPress = null;
+          });
+          return;
+        }
+        final now = DateTime.now();
+        if (_lastBackPress != null &&
+            now.difference(_lastBackPress!) <= const Duration(seconds: 2)) {
+          SystemNavigator.pop();
+        } else {
+          _lastBackPress = now;
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(l.pressBackAgainToExit),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+        }
+      },
+      child: Scaffold(
+        appBar: _tab == 0 ? null : AppBar(title: Text(titles[_tab])),
+        body: _VolumeGate(
+          // Keyed by volume so every tab (search index, contents…) is rebuilt
+          // for the newly selected volume.
+          builder: (volumeId) => IndexedStack(
+            key: ValueKey(volumeId),
+            index: _tab,
+            children: [
+              HomeScreen(onShowContents: () => setState(() {
+                _tab = 1;
+                _lastBackPress = null;
+              })),
+              TableOfContentsView(onOpen: open),
+              BookmarksScreen(onOpen: open),
+              SearchScreen(onOpen: open),
+            ],
+          ),
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _tab,
+          onDestinationSelected: (i) => setState(() {
+            _tab = i;
+            _lastBackPress = null;
+          }),
+          destinations: [
+            NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: l.navHome),
+            NavigationDestination(icon: const Icon(Icons.toc_outlined), selectedIcon: const Icon(Icons.toc), label: l.navContents),
+            NavigationDestination(
+              icon: const Icon(Icons.bookmarks_outlined),
+              selectedIcon: const Icon(Icons.bookmarks),
+              label: l.navBookmarks,
+            ),
+            NavigationDestination(icon: const Icon(Icons.search), label: l.navSearch),
           ],
         ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
-        onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: [
-          NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: l.navHome),
-          NavigationDestination(icon: const Icon(Icons.toc_outlined), selectedIcon: const Icon(Icons.toc), label: l.navContents),
-          NavigationDestination(
-            icon: const Icon(Icons.bookmarks_outlined),
-            selectedIcon: const Icon(Icons.bookmarks),
-            label: l.navBookmarks,
-          ),
-          NavigationDestination(icon: const Icon(Icons.search), label: l.navSearch),
-        ],
       ),
     );
   }
