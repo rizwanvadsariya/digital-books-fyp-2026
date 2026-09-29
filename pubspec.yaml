@@ -1,5 +1,5 @@
-name: muallim_ul_quran
-description: "Muallim-Ul-Quran Vol. 1 — an interactive book reader for learning Quranic Arabic."
+name: fehm_e_quran
+description: "Fehm-e-Quran — an interactive book reader for learning Quranic Arabic."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_localizations:
     sdk: flutter
+  firebase_core: ^4.15.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

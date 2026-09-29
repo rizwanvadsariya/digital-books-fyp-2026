@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muallim_ul_quran/models/content_block.dart';
+import 'package:fehm_e_quran/models/content_block.dart';
 
 import '../helpers.dart';
 
@@ -20,7 +20,10 @@ void main() {
     expect(book.title, 'Muallim-Ul-Quran Volume 2');
     expect(book.length, 115);
     expect(book.pages.every((p) => p.blocks.isNotEmpty), isTrue);
-    expect([for (final (pg, b) in blocks()) if (b is UnknownBlock) '$pg:${b.type}'], isEmpty);
+    expect([
+      for (final (pg, b) in blocks())
+        if (b is UnknownBlock) '$pg:${b.type}',
+    ], isEmpty);
   });
 
   test('builds units 4 and 5 from page fields', () {
@@ -29,7 +32,9 @@ void main() {
     expect(book.units[0].lessons.length, 17);
     expect(book.units[1].lessons.length, 23);
     // key_words / quranic_style pages stay inside their lessons.
-    final lesson20 = book.units[1].lessons.firstWhere((l) => l.lessonLabel == '20');
+    final lesson20 = book.units[1].lessons.firstWhere(
+      (l) => l.lessonLabel == '20',
+    );
     expect(lesson20.pageCount, 4);
   });
 
@@ -45,7 +50,10 @@ void main() {
         if (b is TextBlock && b.type == 'unit_summary_box') b,
     ];
     expect(boxes, hasLength(2));
-    expect(boxes.every((b) => (b.label ?? b.text).isNotEmpty && b.items.isNotEmpty), isTrue);
+    expect(
+      boxes.every((b) => (b.label ?? b.text).isNotEmpty && b.items.isNotEmpty),
+      isTrue,
+    );
     expect(boxes.any((b) => b.label == 'فہم قرآن میں یونٹ 5 کا کردار'), isTrue);
   });
 
@@ -63,25 +71,44 @@ void main() {
         expect(row.values.elementAt(2), '←');
       }
     }
-    expect(listTables.first.rows.first.values, ['مثال 1', 'قَوْلٌ : قول، بات', '←', 'قَوْلًا : قول کے اعتبار سے']);
+    expect(listTables.first.rows.first.values, [
+      'مثال 1',
+      'قَوْلٌ : قول، بات',
+      '←',
+      'قَوْلًا : قول کے اعتبار سے',
+    ]);
   });
 
   test('extra row keys get clean headers', () {
-    final tables = [for (final (_, b) in blocks()) if (b is TableBlock) b];
+    final tables = [
+      for (final (_, b) in blocks())
+        if (b is TableBlock) b,
+    ];
     final pluralNote = tables.firstWhere((t) => t.keys.contains('note'));
     expect(pluralNote.headers, ['واحد', 'جمع', '']);
     // Every table has as many headers as columns of data.
-    expect(tables.every((t) => t.headers.length == t.keys.length && t.rows.isNotEmpty), isTrue);
+    expect(
+      tables.every(
+        (t) => t.headers.length == t.keys.length && t.rows.isNotEmpty,
+      ),
+      isTrue,
+    );
   });
 
   test('model-paper questions carry their marks', () {
-    final marked = [for (final (_, b) in blocks()) if (b is QuestionBlock && b.marks != null) b];
+    final marked = [
+      for (final (_, b) in blocks())
+        if (b is QuestionBlock && b.marks != null) b,
+    ];
     expect(marked.map((q) => q.marks), [10, 10, 10, 20]);
   });
 
   test('printed contents rows resolve to pages', () {
     final toc = book.firstPageOfKind('table_of_contents')!;
-    final rows = toc.blocks.whereType<TableBlock>().expand((t) => t.rows).toList();
+    final rows = toc.blocks
+        .whereType<TableBlock>()
+        .expand((t) => t.rows)
+        .toList();
     expect(rows, isNotEmpty);
     // One row in the source has no page number; the app skips such rows.
     for (final r in rows.where((r) => r['صفحہ'] != null)) {
@@ -93,9 +120,17 @@ void main() {
   });
 
   test('every page kind maps to a label', () {
-    expect(book.pages.map((p) => p.pageKind).whereType<String>().toSet(),
-        {'guidance_notes', 'table_of_contents', 'unit_cover', 'model_paper', 'quranic_style', 'key_words'});
-    final modelPaper = book.pages.firstWhere((p) => p.pageKind == 'model_paper');
+    expect(book.pages.map((p) => p.pageKind).whereType<String>().toSet(), {
+      'guidance_notes',
+      'table_of_contents',
+      'unit_cover',
+      'model_paper',
+      'quranic_style',
+      'key_words',
+    });
+    final modelPaper = book.pages.firstWhere(
+      (p) => p.pageKind == 'model_paper',
+    );
     expect(book.locationLabel(modelPaper), 'یونٹ 4 · ماڈل پیپر');
   });
 }

@@ -10,7 +10,7 @@ class AppLocalizationsUr extends AppLocalizations {
   AppLocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
-  String get appTitle => 'معلم القرآن';
+  String get appTitle => 'فہم القرآن';
 
   @override
   String get navHome => 'ہوم';

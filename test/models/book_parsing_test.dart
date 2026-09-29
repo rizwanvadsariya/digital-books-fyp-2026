@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muallim_ul_quran/models/content_block.dart';
+import 'package:fehm_e_quran/models/content_block.dart';
 
 import '../helpers.dart';
 
@@ -13,7 +13,11 @@ void main() {
         for (final b in p.blocks)
           if (b is UnknownBlock) '${p.pdfPage}:${b.type}',
     ];
-    expect(unknown, isEmpty, reason: 'every block type in the data should have a typed model');
+    expect(
+      unknown,
+      isEmpty,
+      reason: 'every block type in the data should have a typed model',
+    );
   });
 
   test('unknown block types fall back instead of throwing', () {
@@ -27,7 +31,10 @@ void main() {
   });
 
   test('known type with a malformed shape falls back', () {
-    final b = ContentBlock.fromJson({'type': 'vocab_list', 'items': 'not a list'});
+    final b = ContentBlock.fromJson({
+      'type': 'vocab_list',
+      'items': 'not a list',
+    });
     expect(b, isA<VocabListBlock>());
     expect((b as VocabListBlock).items, isEmpty);
   });
@@ -46,7 +53,9 @@ void main() {
   });
 
   test('tables keep repeated headers but use disambiguated row keys', () {
-    final table = book.pages[book.indexForPdfPage(35)!].blocks.whereType<TableBlock>().first;
+    final table = book.pages[book.indexForPdfPage(35)!].blocks
+        .whereType<TableBlock>()
+        .first;
     expect(table.headers.where((h) => h == 'مطلب').length, 2);
     expect(table.keys, contains('مطلب ۲'));
     expect(table.rows.first['مطلب ۲'], isNotNull);

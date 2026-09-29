@@ -1,4 +1,4 @@
-# muallim_ul_quran
+# fehm_e_quran
 
 A new Flutter project.
 

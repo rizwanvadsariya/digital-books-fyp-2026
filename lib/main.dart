@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'blocs/volume_session.dart';
 import 'data/book_repository.dart';
 import 'data/local_store.dart';
 import 'data/volumes.dart';
+import 'firebase_options.dart';
 import 'l10n/l10n.dart';
 import 'models/reader_settings.dart';
 import 'screens/splash_screen.dart';
@@ -17,9 +19,12 @@ import 'theme/book_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   _registerFontLicenses();
   final store = LocalStore(await SharedPreferences.getInstance());
-  runApp(MuallimApp(store: store));
+  runApp(FehmEQuranApp(store: store));
 }
 
 void _registerFontLicenses() {
@@ -36,8 +41,8 @@ void _registerFontLicenses() {
   });
 }
 
-class MuallimApp extends StatefulWidget {
-  const MuallimApp({super.key, required this.store, this.repositoryFor});
+class FehmEQuranApp extends StatefulWidget {
+  const FehmEQuranApp({super.key, required this.store, this.repositoryFor});
 
   final LocalStore store;
 
@@ -45,10 +50,10 @@ class MuallimApp extends StatefulWidget {
   final BookRepository Function(BookVolume volume)? repositoryFor;
 
   @override
-  State<MuallimApp> createState() => _MuallimAppState();
+  State<FehmEQuranApp> createState() => _FehmEQuranAppState();
 }
 
-class _MuallimAppState extends State<MuallimApp> {
+class _FehmEQuranAppState extends State<FehmEQuranApp> {
   late final _library = LibraryCubit(widget.store);
   late final AppLifecycleListener _lifecycle;
 

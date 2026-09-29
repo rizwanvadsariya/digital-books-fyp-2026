@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muallim_ul_quran/data/book_repository.dart';
-import 'package:muallim_ul_quran/data/local_store.dart';
-import 'package:muallim_ul_quran/data/volumes.dart';
-import 'package:muallim_ul_quran/main.dart';
-import 'package:muallim_ul_quran/screens/home_shell.dart';
-import 'package:muallim_ul_quran/screens/reader_screen.dart';
+import 'package:fehm_e_quran/data/book_repository.dart';
+import 'package:fehm_e_quran/data/local_store.dart';
+import 'package:fehm_e_quran/data/volumes.dart';
+import 'package:fehm_e_quran/main.dart';
+import 'package:fehm_e_quran/screens/home_shell.dart';
+import 'package:fehm_e_quran/screens/reader_screen.dart';
 
 import '../helpers.dart';
 
@@ -13,7 +13,9 @@ void main() {
   late Map<String, BookRepository> repositories;
 
   setUpAll(() {
-    repositories = {for (final v in bookVolumes) v.id: BookRepository(assetPath: v.assetPath)};
+    repositories = {
+      for (final v in bookVolumes) v.id: BookRepository(assetPath: v.assetPath),
+    };
   });
 
   Future<void> pumpApp(WidgetTester tester, LocalStore store) async {
@@ -23,12 +25,16 @@ void main() {
     for (final r in repositories.values) {
       await tester.runAsync(r.load);
     }
-    await tester.pumpWidget(MuallimApp(store: store, repositoryFor: (v) => repositories[v.id]!));
+    await tester.pumpWidget(
+      FehmEQuranApp(store: store, repositoryFor: (v) => repositories[v.id]!),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(HomeShell), findsOneWidget);
   }
 
-  testWidgets('switching to Volume 2 loads its book and keeps data separate', (tester) async {
+  testWidgets('switching to Volume 2 loads its book and keeps data separate', (
+    tester,
+  ) async {
     final store = await freshStore({
       'settings.v1': '{"language":"english"}',
       // Existing Volume 1 data under the original, un-prefixed keys.
@@ -78,31 +84,41 @@ void main() {
     expect(store.forVolume('vol2.').readAnswers(), isEmpty);
   });
 
-  testWidgets('Volume 3 opens with unit 6, its front matter and printed contents', (tester) async {
-    final store = await freshStore({'settings.v1': '{"language":"english"}'});
-    await pumpApp(tester, store);
+  testWidgets(
+    'Volume 3 opens with unit 6, its front matter and printed contents',
+    (tester) async {
+      final store = await freshStore({'settings.v1': '{"language":"english"}'});
+      await pumpApp(tester, store);
 
-    // Three volume cards, same style.
-    expect(find.text('Volume 1'), findsOneWidget);
-    expect(find.text('Volume 2'), findsOneWidget);
-    expect(find.text('Volume 3'), findsOneWidget);
-    expect(find.text('Unit 6'), findsOneWidget);
+      // Three volume cards, same style.
+      expect(find.text('Volume 1'), findsOneWidget);
+      expect(find.text('Volume 2'), findsOneWidget);
+      expect(find.text('Volume 3'), findsOneWidget);
+      expect(find.text('Unit 6'), findsOneWidget);
 
-    await tester.tap(find.text('Volume 3'));
-    await tester.pumpAndSettle();
-    expect(find.text('جلد سوم'), findsOneWidget);
-    expect(store.readSelectedVolume(), 'vol3');
+      await tester.tap(find.text('Volume 3'));
+      await tester.pumpAndSettle();
+      expect(find.text('جلد سوم'), findsOneWidget);
+      expect(store.readSelectedVolume(), 'vol3');
 
-    await tester.tap(find.text('Contents').last);
-    await tester.pumpAndSettle();
-    expect(find.text('Unit 6'), findsWidgets);
-    expect(find.text('Introduction'), findsWidgets, reason: 'front-matter chip');
-    expect(find.text("Book's contents"), findsOneWidget);
-    expect(find.text('Unit 5'), findsNothing);
-  });
+      await tester.tap(find.text('Contents').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Unit 6'), findsWidgets);
+      expect(
+        find.text('Introduction'),
+        findsWidgets,
+        reason: 'front-matter chip',
+      );
+      expect(find.text("Book's contents"), findsOneWidget);
+      expect(find.text('Unit 5'), findsNothing);
+    },
+  );
 
   testWidgets('the selected volume is restored on launch', (tester) async {
-    final store = await freshStore({'settings.v1': '{"language":"english"}', 'library.volume': 'vol2'});
+    final store = await freshStore({
+      'settings.v1': '{"language":"english"}',
+      'library.volume': 'vol2',
+    });
     await pumpApp(tester, store);
     expect(find.text('جلد دوم'), findsOneWidget);
   });

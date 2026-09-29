@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muallim_ul_quran/utils/arabic_text.dart';
+import 'package:fehm_e_quran/utils/arabic_text.dart';
 
 void main() {
   group('answerMatches', () {
@@ -31,8 +31,15 @@ void main() {
 
   test('splits mixed Urdu prose and vocalised Arabic into runs', () {
     final runs = splitScriptRuns('انہی الفاظ کے شروع میں (إِنَّ، مِنْ) سے');
-    expect(runs.map((r) => r.script), [Script.urdu, Script.arabic, Script.urdu]);
-    expect(runs.map((r) => r.text).join(), 'انہی الفاظ کے شروع میں (إِنَّ، مِنْ) سے');
+    expect(runs.map((r) => r.script), [
+      Script.urdu,
+      Script.arabic,
+      Script.urdu,
+    ]);
+    expect(
+      runs.map((r) => r.text).join(),
+      'انہی الفاظ کے شروع میں (إِنَّ، مِنْ) سے',
+    );
   });
 
   test('classifies whole strings', () {

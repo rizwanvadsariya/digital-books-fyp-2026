@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muallim_ul_quran/theme/book_theme.dart';
-import 'package:muallim_ul_quran/widgets/common/script_text.dart';
+import 'package:fehm_e_quran/theme/book_theme.dart';
+import 'package:fehm_e_quran/widgets/common/script_text.dart';
 
 import '../helpers.dart';
 
@@ -10,7 +10,9 @@ import '../helpers.dart';
 void main() {
   for (final text in ['←', 'بَيْتُهَا ← اسکا گھر', 'قَوْلٌ ↔ قَوْلًا']) {
     testWidgets('"$text" can fall back to the symbols font', (tester) async {
-      await tester.pumpWidget(harness(ScriptText(text), store: await freshStore()));
+      await tester.pumpWidget(
+        harness(ScriptText(text), store: await freshStore()),
+      );
       final rich = tester.widget<RichText>(find.byType(RichText).first);
       // Style of every span that holds text, inheriting from its parent.
       final styles = <TextStyle>[];
@@ -26,7 +28,12 @@ void main() {
 
       walk(rich.text, null);
       expect(styles, isNotEmpty);
-      expect(styles.every((s) => s.fontFamilyFallback?.contains(symbolsFont) ?? false), isTrue);
+      expect(
+        styles.every(
+          (s) => s.fontFamilyFallback?.contains(symbolsFont) ?? false,
+        ),
+        isTrue,
+      );
     });
   }
 }

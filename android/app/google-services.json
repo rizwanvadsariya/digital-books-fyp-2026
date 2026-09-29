@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1059798380304",
+    "project_id": "fehm-e-quran",
+    "storage_bucket": "fehm-e-quran.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1059798380304:android:3971d2b360d0b9ca4cff95",
+        "android_client_info": {
+          "package_name": "com.hexmorio.fehm_e_quran"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhRw5R7esWMQTXhIBkb5EMjl0D9z1zfN4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
