@@ -9,8 +9,9 @@ import '../data/search_index.dart';
 import '../l10n/l10n.dart';
 import '../models/book.dart';
 import '../theme/book_theme.dart';
-import '../utils/arabic_text.dart';
-import '../widgets/common/script_text.dart';
+import '../widgets/search/search_hit_tile.dart';
+import '../widgets/search/search_no_results_view.dart';
+import '../widgets/search/search_prompt_view.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key, required this.onOpen});
@@ -100,6 +101,40 @@ class _SearchScreenState extends State<SearchScreen> {
     _performSearch('');
   }
 
+  void _handleSubmitted(String q) {
+    _performSearch(q);
+    _focusNode.unfocus();
+  }
+
+  void _handleHitTap(int pageIndex) {
+    widget.onOpen(pageIndex);
+  }
+
+  Widget _buildBody(Book book, AppLocalizations l, String query) {
+    if (query.isEmpty) {
+      return SearchPromptView(onSelectSuggestion: _applySuggestion);
+    }
+    if (_hits.isEmpty && !_isSearching) {
+      return SearchNoResultsView(query: query);
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.only(bottom: 24),
+      itemCount: _hits.length,
+      separatorBuilder: (_, _) =>
+          const Divider(height: 1, indent: 16, endIndent: 16),
+      itemBuilder: (context, i) {
+        final hit = _hits[i];
+        final page = book.pages[hit.pageIndex];
+        return SearchHitTile(
+          hit: hit,
+          page: page,
+          query: query,
+          onTap: () => _handleHitTap(hit.pageIndex),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final book = context.read<BookCubit>().state.book!;
@@ -174,10 +209,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
             ],
             onChanged: _onChanged,
-            onSubmitted: (q) {
-              _performSearch(q);
-              _focusNode.unfocus();
-            },
+            onSubmitted: _handleSubmitted,
             textInputAction: TextInputAction.search,
           ),
         ),
@@ -200,248 +232,6 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         Expanded(child: _buildBody(book, l, query)),
       ],
-    );
-  }
-
-  Widget _buildBody(Book book, AppLocalizations l, String query) {
-    if (query.isEmpty) {
-      return _SearchPromptView(onSelectSuggestion: _applySuggestion);
-    }
-    if (_hits.isEmpty && !_isSearching) {
-      return _SearchNoResultsView(query: query);
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 24),
-      itemCount: _hits.length,
-      separatorBuilder: (_, _) =>
-          const Divider(height: 1, indent: 16, endIndent: 16),
-      itemBuilder: (context, i) {
-        final hit = _hits[i];
-        final page = book.pages[hit.pageIndex];
-        return _SearchHitTile(
-          hit: hit,
-          page: page,
-          query: query,
-          onTap: () => widget.onOpen(hit.pageIndex),
-        );
-      },
-    );
-  }
-}
-
-class _SearchHitTile extends StatelessWidget {
-  const _SearchHitTile({
-    required this.hit,
-    required this.page,
-    required this.query,
-    required this.onTap,
-  });
-
-  final SearchHit hit;
-  final BookPage page;
-  final String query;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = BookTheme.of(context);
-    final l = context.l10n;
-    final truncatedText = hit.text.characters.length > 160
-        ? '${hit.text.characters.take(160)}…'
-        : hit.text;
-
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      title: _HighlightedText(text: truncatedText, query: query),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          pageLocation(l, page),
-          style: TextStyle(fontSize: 12, color: theme.muted),
-        ),
-      ),
-      trailing: page.printedPage != null
-          ? Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: theme.paperShade.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                l.pageShort(page.printedPage!),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.muted,
-                  fontFamily: arabicFont,
-                ),
-              ),
-            )
-          : null,
-      onTap: onTap,
-    );
-  }
-}
-
-class _HighlightedText extends StatelessWidget {
-  const _HighlightedText({required this.text, required this.query});
-
-  final String text;
-  final String query;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    final normQuery = normalizeForSearch(query);
-    if (normQuery.isEmpty) {
-      return ScriptText(text, size: 14);
-    }
-
-    final words = text.split(' ');
-    final spans = <TextSpan>[];
-
-    for (var i = 0; i < words.length; i++) {
-      final word = words[i];
-      final normWord = normalizeForSearch(word);
-      final isMatch = normWord.isNotEmpty && normWord.contains(normQuery);
-
-      final style = book.forScript(
-        dominantScript(word),
-        size: 14,
-        bold: isMatch,
-        color: isMatch ? book.red : book.ink,
-      );
-
-      spans.add(
-        TextSpan(
-          text: i < words.length - 1 ? '$word ' : word,
-          style: isMatch
-              ? style.copyWith(
-                  backgroundColor: book.red.withValues(alpha: 0.12),
-                )
-              : style,
-        ),
-      );
-    }
-
-    return Text.rich(
-      TextSpan(children: spans),
-      textDirection: TextDirection.rtl,
-    );
-  }
-}
-
-class _SearchPromptView extends StatelessWidget {
-  const _SearchPromptView({required this.onSelectSuggestion});
-
-  final ValueChanged<String> onSelectSuggestion;
-
-  static const _suggestions = [
-    'الْحَمْدُ',
-    'الْكِتَاب',
-    'رَبّ',
-    'مُسْلِم',
-    'إِيمَان',
-    'فِعْل',
-    'ضَمِير',
-    'جَنَّة',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = BookTheme.of(context);
-    final l = context.l10n;
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.boxTint,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(SolarIconsOutline.magnifier, size: 42, color: theme.accent),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              l.searchPromptTitle,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              l.searchPromptSubtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: theme.muted, fontSize: 13),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              l.searchSuggested,
-              style: TextStyle(
-                color: theme.muted,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                for (final word in _suggestions)
-                  ActionChip(
-                    backgroundColor: theme.paper,
-                    side: BorderSide(
-                      color: theme.border.withValues(alpha: 0.3),
-                    ),
-                    label: ScriptText(
-                      word,
-                      size: 13,
-                      forceScript: Script.arabic,
-                    ),
-                    onPressed: () => onSelectSuggestion(word),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchNoResultsView extends StatelessWidget {
-  const _SearchNoResultsView({required this.query});
-
-  final String query;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = BookTheme.of(context);
-    final l = context.l10n;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(SolarIconsOutline.minimalisticMagnifier, size: 48, color: theme.muted),
-            const SizedBox(height: 14),
-            Text(
-              l.searchNoResultsTitle,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              l.searchNoResultsSubtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: theme.muted, fontSize: 13),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

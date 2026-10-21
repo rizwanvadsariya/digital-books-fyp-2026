@@ -9,6 +9,7 @@ import '../../theme/book_theme.dart';
 import '../../utils/arabic_text.dart';
 import '../keyboard/keyboard_cubit.dart';
 import '../keyboard/keyboard_layouts.dart';
+import 'check_button.dart';
 
 /// The printed blank line (`______`) of an exercise, made answerable.
 ///
@@ -107,6 +108,10 @@ class _AnswerFieldState extends State<AnswerField> {
     );
   }
 
+  void _handleSwitchToCustomKeyboard() {
+    _keyboard.setUseNative(false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
@@ -179,7 +184,7 @@ class _AnswerFieldState extends State<AnswerField> {
                   ? IconButton(
                       tooltip: l.useArabicKeyboard,
                       icon: const Icon(SolarIconsOutline.translation, size: 18),
-                      onPressed: () => _keyboard.setUseNative(false),
+                      onPressed: _handleSwitchToCustomKeyboard,
                     )
                   : null,
               suffixIconConstraints: const BoxConstraints(
@@ -201,7 +206,7 @@ class _AnswerFieldState extends State<AnswerField> {
               else
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final check = _CheckButton(
+                    final check = CheckButton(
                       result: result,
                       onPressed: _check,
                     );
@@ -257,33 +262,6 @@ class _AnswerFieldState extends State<AnswerField> {
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _CheckButton extends StatelessWidget {
-  const _CheckButton({required this.result, required this.onPressed});
-
-  final bool? result;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    final (icon, color) = switch (result) {
-      true => (SolarIconsBold.checkCircle, book.correct),
-      false => (SolarIconsBold.closeCircle, book.incorrect),
-      null => (SolarIconsOutline.checkCircle, book.muted),
-    };
-    return SizedBox(
-      width: 34,
-      height: 34,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        tooltip: context.l10n.checkAnswer,
-        icon: Icon(icon, color: color, size: 22),
-        onPressed: onPressed,
       ),
     );
   }

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/book_cubit.dart';
 import '../l10n/l10n.dart';
 import '../models/book.dart';
 import '../models/content_block.dart';
 import '../theme/book_theme.dart';
-import '../widgets/common/script_text.dart';
+import '../widgets/toc/toc_lesson_tile.dart';
+import '../widgets/toc/toc_page_tile.dart';
+import '../widgets/toc/toc_section_header.dart';
+import '../widgets/toc/toc_unit_header.dart';
 
 /// Contents opened from inside the reader; pops with the chosen page index.
 class TableOfContentsScreen extends StatelessWidget {
@@ -15,13 +17,17 @@ class TableOfContentsScreen extends StatelessWidget {
 
   final int? currentIndex;
 
+  void _handlePop(BuildContext context, int pageIndex) {
+    Navigator.of(context).pop(pageIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.navContents)),
       body: TableOfContentsView(
         currentIndex: currentIndex,
-        onOpen: (i) => Navigator.of(context).pop(i),
+        onOpen: (i) => _handlePop(context, i),
       ),
     );
   }
@@ -58,6 +64,51 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
       );
     }
   }
+
+  void _handleOpen(int index) {
+    widget.onOpen(index);
+  }
+
+  void _handlePrintedRowTap(Book book, String? printedPage) {
+    final i = printedPage == null ? null : book.indexForPrintedPage(printedPage);
+    if (i != null) {
+      widget.onOpen(i);
+    }
+  }
+
+  static String? _pageTitle(BookPage p) {
+    for (final b in p.blocks) {
+      if (b is TextBlock &&
+          const {
+            'title',
+            'section_heading',
+            'heading',
+            'book_title',
+            'subheading',
+          }.contains(b.type)) {
+        return b.text;
+      }
+    }
+    return null;
+  }
+
+  /// (topic, lesson, printed page) rows from the printed contents tables.
+  /// Columns are found by their printed headers: Volumes 1–2 use موضوع,
+  /// Volume 3 splits it into عنوان (title) and ہدف (goal).
+  static List<(String, String?, String?)> _printedRows(List<BookPage> pages) => [
+    for (final page in pages)
+      for (final b in page.blocks)
+        if (b is TableBlock && b.keyForHeader('صفحہ') != null)
+          for (final r in b.rows)
+            (
+              [
+                for (final h in const ['موضوع', 'عنوان', 'ہدف'])
+                  if (b.keyForHeader(h) case final k? when r[k] != null) r[k]!,
+              ].join(' '),
+              b.keyForHeader('سبق') == null ? null : r[b.keyForHeader('سبق')],
+              r[b.keyForHeader('صفحہ')],
+            ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -115,53 +166,48 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (frontMatter.isNotEmpty)
-                  _SectionHeader(key: _key('front'), title: l.sectionFront),
+                  TocSectionHeader(key: _key('front'), title: l.sectionFront),
                 for (final p in frontMatter)
-                  _PageTile(
+                  TocPageTile(
                     title: _pageTitle(p) ?? l.pageN('${p.index + 1}'),
                     printedPage: p.printedPage,
                     selected: widget.currentIndex == p.index,
-                    onTap: () => widget.onOpen(p.index),
+                    onTap: () => _handleOpen(p.index),
                   ),
                 for (final unit in book.units) ...[
-                  _UnitHeader(
+                  TocUnitHeader(
                     key: _key('unit${unit.unit}'),
                     unit: unit,
-                    onTap: () => widget.onOpen(unit.coverPageIndex),
+                    onTap: () => _handleOpen(unit.coverPageIndex),
                   ),
                   for (final lesson in unit.lessons)
-                    _LessonTile(
+                    TocLessonTile(
                       lesson: lesson,
                       selected:
                           widget.currentIndex != null &&
                           widget.currentIndex! >= lesson.firstPageIndex &&
                           widget.currentIndex! <
                               lesson.firstPageIndex + lesson.pageCount,
-                      onTap: () => widget.onOpen(lesson.firstPageIndex),
+                      onTap: () => _handleOpen(lesson.firstPageIndex),
                     ),
                 ],
                 if (extras.isNotEmpty)
-                  _SectionHeader(key: _key('extra'), title: l.sectionExtra),
+                  TocSectionHeader(key: _key('extra'), title: l.sectionExtra),
                 for (final p in extras)
-                  _PageTile(
+                  TocPageTile(
                     title: pageLocation(l, p),
                     printedPage: p.printedPage,
                     selected: widget.currentIndex == p.index,
-                    onTap: () => widget.onOpen(p.index),
+                    onTap: () => _handleOpen(p.index),
                   ),
                 if (printedRows.isNotEmpty) ...[
-                  _SectionHeader(key: _key('printed'), title: l.sectionPrinted),
+                  TocSectionHeader(key: _key('printed'), title: l.sectionPrinted),
                   for (final row in printedRows)
-                    _PageTile(
+                    TocPageTile(
                       title: row.$1,
                       leading: row.$2,
                       printedPage: row.$3,
-                      onTap: () {
-                        final i = row.$3 == null
-                            ? null
-                            : book.indexForPrintedPage(row.$3!);
-                        if (i != null) widget.onOpen(i);
-                      },
+                      onTap: () => _handlePrintedRowTap(book, row.$3),
                     ),
                 ],
                 Padding(
@@ -177,202 +223,6 @@ class _TableOfContentsViewState extends State<TableOfContentsView> {
           ),
         ),
       ],
-    );
-  }
-
-  static String? _pageTitle(BookPage p) {
-    for (final b in p.blocks) {
-      if (b is TextBlock &&
-          const {
-            'title',
-            'section_heading',
-            'heading',
-            'book_title',
-            'subheading',
-          }.contains(b.type)) {
-        return b.text;
-      }
-    }
-    return null;
-  }
-
-  /// (topic, lesson, printed page) rows from the printed contents tables.
-  /// Columns are found by their printed headers: Volumes 1–2 use موضوع,
-  /// Volume 3 splits it into عنوان (title) and ہدف (goal).
-  static List<(String, String?, String?)> _printedRows(List<BookPage> pages) => [
-    for (final page in pages)
-      for (final b in page.blocks)
-        if (b is TableBlock && b.keyForHeader('صفحہ') != null)
-          for (final r in b.rows)
-            (
-              [
-                for (final h in const ['موضوع', 'عنوان', 'ہدف'])
-                  if (b.keyForHeader(h) case final k? when r[k] != null) r[k]!,
-              ].join(' '),
-              b.keyForHeader('سبق') == null ? null : r[b.keyForHeader('سبق')],
-              r[b.keyForHeader('صفحہ')],
-            ),
-  ];
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium
-            ?.copyWith(color: book.red, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _UnitHeader extends StatelessWidget {
-  const _UnitHeader({super.key, required this.unit, required this.onTap});
-
-  final UnitEntry unit;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 18, 12, 4),
-      child: Material(
-        color: book.red,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: Row(
-              children: [
-                Text(
-                  context.l10n.unitN('${unit.unit}'),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                if (unit.title != null)
-                  Expanded(
-                    child: ScriptText(
-                      unit.title!,
-                      size: 14,
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  )
-                else
-                  const Spacer(),
-                const SizedBox(width: 12),
-                Text(
-                  context.l10n.lessonsCount(unit.lessons.length),
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LessonTile extends StatelessWidget {
-  const _LessonTile({
-    required this.lesson,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final LessonEntry lesson;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    final l = context.l10n;
-    return ListTile(
-      selected: selected,
-      onTap: onTap,
-      leading: CircleAvatar(
-        radius: 17,
-        backgroundColor: selected ? book.red : book.badgeBg,
-        child: Text(
-          lesson.lessonLabel,
-          style: TextStyle(
-            color: selected ? Colors.white : book.badgeFg,
-            fontSize: lesson.lessonLabel.length > 2 ? 10 : 13,
-          ),
-        ),
-      ),
-      title: lesson.title != null
-          ? ScriptText(lesson.title!, size: 14)
-          : Text(l.lessonN(lesson.lessonLabel)),
-      subtitle: Text(
-        l.pagesCount(lesson.pageCount),
-        style: TextStyle(color: book.muted, fontSize: 11),
-      ),
-      trailing: lesson.printedPage != null
-          ? Text(
-              l.pageShort(lesson.printedPage!),
-              style: TextStyle(color: book.muted),
-            )
-          : null,
-    );
-  }
-}
-
-class _PageTile extends StatelessWidget {
-  const _PageTile({
-    required this.title,
-    required this.onTap,
-    this.printedPage,
-    this.leading,
-    this.selected = false,
-  });
-
-  final String title;
-  final String? printedPage;
-  final String? leading;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    return ListTile(
-      dense: true,
-      selected: selected,
-      onTap: onTap,
-      leading: leading != null
-          ? SizedBox(
-              width: 36,
-              child: Text(
-                leading!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: book.red),
-              ),
-            )
-          : Icon(SolarIconsOutline.documentText, color: book.muted, size: 20),
-      title: ScriptText(title, size: 13.5),
-      trailing: printedPage != null
-          ? Text(
-              context.l10n.pageShort(printedPage!),
-              style: TextStyle(color: book.muted),
-            )
-          : null,
     );
   }
 }

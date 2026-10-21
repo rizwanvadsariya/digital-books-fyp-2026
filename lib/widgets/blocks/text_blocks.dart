@@ -7,6 +7,8 @@ import '../../theme/book_theme.dart';
 import '../../utils/arabic_text.dart';
 import '../common/script_text.dart';
 import '../exercise/word_answer_grid.dart';
+import 'bulleted_item.dart';
+import 'labelled_box.dart';
 import 'styled_frame.dart';
 
 Color _textColor(BookTheme book, TextBlock b, {Color? fallback}) {
@@ -158,7 +160,7 @@ class ProseBlockView extends StatelessWidget {
           child: ScriptText('— ${b.text}', size: 14, color: book.muted),
         );
       case 'list_item':
-        return _Bulleted(
+        return BulletedItem(
           marker: b.number != null ? '${b.number}.' : null,
           child: ScriptText(b.text, size: 15, align: TextAlign.justify),
         );
@@ -225,7 +227,7 @@ class NoteBlockView extends StatelessWidget {
           align: TextAlign.justify,
         );
         return b.bullet
-            ? _Bulleted(marker: '•', child: text)
+            ? BulletedItem(marker: '•', child: text)
             : StyledFrame(style: b.style, child: text);
 
       case 'note_box':
@@ -260,7 +262,7 @@ class NoteBlockView extends StatelessWidget {
         );
 
       case 'highlight':
-        return _LabelledBox(
+        return LabelledBox(
           label: b.label,
           color: b.style.red || b.style.raw == null ? book.red : book.border,
           child: ScriptText(
@@ -273,7 +275,7 @@ class NoteBlockView extends StatelessWidget {
         );
 
       case 'unit_summary_box':
-        return _LabelledBox(
+        return LabelledBox(
           label: b.label,
           color: book.red,
           child: Column(
@@ -282,7 +284,7 @@ class NoteBlockView extends StatelessWidget {
               if (b.text.isNotEmpty)
                 ScriptText(b.text, size: 14.5, align: TextAlign.justify),
               for (final item in b.items)
-                _Bulleted(
+                BulletedItem(
                   marker: null,
                   child: ScriptText(item, size: 14.5, align: TextAlign.justify),
                 ),
@@ -326,106 +328,5 @@ class NoteBlockView extends StatelessWidget {
         );
     }
     return ScriptText(b.text);
-  }
-}
-
-class _Bulleted extends StatelessWidget {
-  const _Bulleted({required this.marker, required this.child});
-
-  /// Text marker (e.g. "3." or "•"); `null` draws a red diamond. The diamond
-  /// is painted rather than typed because the book fonts lack a ◆ glyph.
-  final String? marker;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 26,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: marker != null
-                ? Text(
-                    marker!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: book.red,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.only(top: 7),
-                    child: Center(
-                      child: Transform.rotate(
-                        angle: 0.785398,
-                        child: Container(width: 7, height: 7, color: book.red),
-                      ),
-                    ),
-                  ),
-          ),
-        ),
-        Expanded(child: child),
-      ],
-    );
-  }
-}
-
-class _LabelledBox extends StatelessWidget {
-  const _LabelledBox({
-    required this.label,
-    required this.color,
-    required this.child,
-  });
-
-  final String? label;
-  final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final book = BookTheme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: book.boxTint,
-        border: Border.all(color: color, width: 1.4),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (label != null)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 0,
-                ),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: const BorderRadiusDirectional.only(
-                    topStart: Radius.circular(8),
-                    bottomEnd: Radius.circular(10),
-                  ),
-                ),
-                child: ScriptText(
-                  label!,
-                  size: 13,
-                  bold: true,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
-            child: child,
-          ),
-        ],
-      ),
-    );
   }
 }

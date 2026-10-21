@@ -8,12 +8,12 @@ import '../blocs/book_cubit.dart';
 import '../blocs/library_cubit.dart';
 import '../blocs/progress_cubit.dart';
 import '../core/navigation/route_enums.dart';
-import '../data/volumes.dart';
 import '../l10n/l10n.dart';
 import '../models/content_block.dart';
 import '../theme/book_theme.dart';
-import '../widgets/blocks/styled_frame.dart';
-import 'answers_review_screen.dart';
+import '../widgets/home/action_tile.dart';
+import '../widgets/home/book_cover.dart';
+import '../widgets/home/volume_shelf.dart';
 import 'reader_screen.dart';
 import 'settings_screen.dart';
 
@@ -21,6 +21,18 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.onShowContents});
 
   final VoidCallback onShowContents;
+
+  void _handleOpenReader(BuildContext context, int pageIndex) {
+    openReader(context, pageIndex);
+  }
+
+  void _handleOpenAnswers(BuildContext context) {
+    context.pushNamed(AppRoutes.answersReview.name);
+  }
+
+  void _handleOpenSettings(BuildContext context) {
+    openSettings(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,19 +59,19 @@ class HomeScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          const _VolumeShelf(),
+          const VolumeShelf(),
           const SizedBox(height: 12),
-          _Cover(
+          BookCover(
             volume: volume,
             tagline: tagline,
-            onTap: () => openReader(context, last ?? 0),
+            onTap: () => _handleOpenReader(context, last ?? 0),
           ),
           const SizedBox(height: 16),
           if (last != null)
             Card(
               clipBehavior: Clip.antiAlias,
               child: InkWell(
-                onTap: () => openReader(context, last),
+                onTap: () => _handleOpenReader(context, last),
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Row(
@@ -115,263 +127,30 @@ class HomeScreen extends StatelessWidget {
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
             children: [
-              _ActionTile(
+              ActionTile(
                 icon: SolarIconsOutline.book2,
                 label: last == null ? l.startReading : l.readFromStart,
-                onTap: () => openReader(context, 0),
+                onTap: () => _handleOpenReader(context, 0),
               ),
-              _ActionTile(
+              ActionTile(
                 icon: SolarIconsOutline.list_1,
                 label: l.navContents,
                 onTap: onShowContents,
               ),
-              _ActionTile(
+              ActionTile(
                 icon: SolarIconsOutline.notes,
                 label: l.myAnswers,
                 badge: answerCount,
-                onTap: () => context.pushNamed(AppRoutes.answersReview.name),
+                onTap: () => _handleOpenAnswers(context),
               ),
-              _ActionTile(
+              ActionTile(
                 icon: SolarIconsOutline.settings,
                 label: l.settings,
-                onTap: () => openSettings(context),
+                onTap: () => _handleOpenSettings(context),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Volume picker: one mini cover per volume; the open one is highlighted.
-class _VolumeShelf extends StatelessWidget {
-  const _VolumeShelf();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final current = context.watch<LibraryCubit>().state;
-    const gold = Color(0xFFE6C77A);
-    return Row(
-      children: [
-        for (final v in bookVolumes) ...[
-          if (v != bookVolumes.first) const SizedBox(width: 8),
-          Expanded(
-            child: Material(
-              color: v == current
-                  ? const Color(0xFF7A1F1A)
-                  : Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () => context.read<LibraryCubit>().select(v),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: v == current ? gold : Colors.transparent,
-                      width: 1.5,
-                    ),
-                  ),
-                  // Icon beside the text when there's room; stacked above it
-                  // on narrow cards (three volumes on a phone).
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final icon = Icon(
-                        v == current
-                            ? SolarIconsBold.book2
-                            : SolarIconsOutline.book2,
-                        color: v == current ? gold : null,
-                      );
-                      final narrow = constraints.maxWidth < 130;
-                      final labels = Column(
-                        crossAxisAlignment: narrow
-                            ? CrossAxisAlignment.center
-                            : CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l.volumeN(v.number),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: v == current ? Colors.white : null,
-                            ),
-                          ),
-                          Text(
-                            // Isolate numbers so RTL text doesn't read "4–5" as "5–4".
-                            v.units.contains('–')
-                                ? l.unitsRange('\u2066${v.units}\u2069')
-                                : l.unitN(v.units),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: v == current ? Colors.white70 : null,
-                            ),
-                          ),
-                        ],
-                      );
-                      if (narrow) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [icon, const SizedBox(height: 2), labels],
-                        );
-                      }
-                      return Row(
-                        children: [
-                          icon,
-                          const SizedBox(width: 10),
-                          Expanded(child: labels),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _Cover extends StatelessWidget {
-  const _Cover({
-    required this.volume,
-    required this.tagline,
-    required this.onTap,
-  });
-
-  final BookVolume volume;
-  final String? tagline;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    const gold = Color(0xFFE6C77A);
-    return Material(
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      elevation: 4,
-      child: InkWell(
-        onTap: onTap,
-        child: Ink(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              colors: [Color(0xFF7A1F1A), Color(0xFF3E0F0C)],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: CustomPaint(
-              painter: OrnamentalFramePainter(
-                color: gold,
-                fill: Colors.transparent,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 34,
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      'مُعَلِّمُ الْقُرْآن',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: arabicFont,
-                        fontSize: 40,
-                        color: gold,
-                        fontWeight: FontWeight.bold,
-                        height: 1.6,
-                      ),
-                    ),
-                    Text(
-                      volume.coverSubtitle,
-                      style: const TextStyle(
-                        fontFamily: urduFont,
-                        fontSize: 16,
-                        color: Colors.white,
-                        height: 2,
-                      ),
-                    ),
-                    if (tagline != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        tagline!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: urduFont,
-                          fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.85),
-                          height: 2,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionTile extends StatelessWidget {
-  const _ActionTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.badge,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final int? badge;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Badge.count(
-                count: badge ?? 0,
-                isLabelVisible: (badge ?? 0) > 0,
-                offset: const Offset(8, -4),
-                textStyle: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(label, textAlign: TextAlign.center),
-            ],
-          ),
-        ),
       ),
     );
   }

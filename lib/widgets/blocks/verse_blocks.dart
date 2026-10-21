@@ -108,6 +108,15 @@ class RecitationButton extends StatelessWidget {
 
   final String verse;
 
+  void _handleRecitation(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(context.l10n.recitationComingSoon),
+        duration: const Duration(seconds: 2),
+      ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
@@ -115,12 +124,7 @@ class RecitationButton extends StatelessWidget {
       tooltip: context.l10n.listenRecitation,
       visualDensity: VisualDensity.compact,
       icon: Icon(SolarIconsOutline.playCircle, color: book.accent),
-      onPressed: () => ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(
-          content: Text(context.l10n.recitationComingSoon),
-          duration: const Duration(seconds: 2),
-        )),
+      onPressed: () => _handleRecitation(context),
     );
   }
 }

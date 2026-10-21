@@ -24,6 +24,49 @@ class TableBlockView extends StatelessWidget {
 
   static const _pageColumn = 'صفحہ';
 
+  void _handleJump(ReaderNavigation nav, String? printed) {
+    if (printed == null) return;
+    final index = nav.book.indexForPrintedPage(printed);
+    if (index != null) nav.goToIndex(index);
+  }
+
+  Widget _buildCell(
+    BuildContext context, {
+    required int row,
+    required int col,
+    required BookTheme book,
+    required bool practice,
+    required String? pageKey,
+    required Map<int, TableColumnWidth> columnWidths,
+  }) {
+    final key = block.keys[col];
+    final value = block.rows[row][key];
+    final header = block.headers[col];
+    final isMeaning = header.startsWith('مطلب') || header.contains('کا مطلب');
+    final id = answerId(pdfPage, blockIndex, '$row-$col');
+    if (value == null) {
+      // The printed contents table has empty cells that aren't exercises,
+      // and neither are gaps in a row-label column (sized to its content,
+      // which a text field can't report).
+      if (pageKey != null || columnWidths[col] is IntrinsicColumnWidth) {
+        return const SizedBox.shrink();
+      }
+      return AnswerField(id: id, language: isMeaning ? KeyboardLanguage.urdu : KeyboardLanguage.arabic);
+    }
+    if (practice && isMeaning) return AnswerField(id: id, answerKey: value);
+    final firstCol = col == 0 && (header == 'مثال' || header.isEmpty || !block.showHeader);
+    return ScriptText(
+      value,
+      size: firstCol ? 12.5 : 14,
+      bold: firstCol,
+      color: firstCol ? book.red : null,
+      align: TextAlign.center,
+    );
+  }
+
+  Widget _maybeTappable({required Widget child, VoidCallback? onTap}) =>
+      onTap == null ? child : InkWell(onTap: onTap, child: child);
+
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
@@ -40,32 +83,6 @@ class TableBlockView extends StatelessWidget {
         },
     };
     if (!block.showHeader) columnWidths[0] = const IntrinsicColumnWidth();
-
-    Widget cell(int row, int col) {
-      final key = block.keys[col];
-      final value = block.rows[row][key];
-      final header = block.headers[col];
-      final isMeaning = header.startsWith('مطلب') || header.contains('کا مطلب');
-      final id = answerId(pdfPage, blockIndex, '$row-$col');
-      if (value == null) {
-        // The printed contents table has empty cells that aren't exercises,
-        // and neither are gaps in a row-label column (sized to its content,
-        // which a text field can't report).
-        if (pageKey != null || columnWidths[col] is IntrinsicColumnWidth) {
-          return const SizedBox.shrink();
-        }
-        return AnswerField(id: id, language: isMeaning ? KeyboardLanguage.urdu : KeyboardLanguage.arabic);
-      }
-      if (practice && isMeaning) return AnswerField(id: id, answerKey: value);
-      final firstCol = col == 0 && (header == 'مثال' || header.isEmpty || !block.showHeader);
-      return ScriptText(
-        value,
-        size: firstCol ? 12.5 : 14,
-        bold: firstCol,
-        color: firstCol ? book.red : null,
-        align: TextAlign.center,
-      );
-    }
 
     final table = Table(
       border: TableBorder.all(color: book.border.withValues(alpha: 0.6), width: 0.9, borderRadius: BorderRadius.circular(6)),
@@ -89,10 +106,18 @@ class TableBlockView extends StatelessWidget {
             children: [
               for (var c = 0; c < block.keys.length; c++)
                 _maybeTappable(
-                  onTap: pageKey != null && nav != null ? () => _jump(nav, block.rows[r][pageKey]) : null,
+                  onTap: pageKey != null && nav != null ? () => _handleJump(nav, block.rows[r][pageKey]) : null,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    child: cell(r, c),
+                    child: _buildCell(
+                      context,
+                      row: r,
+                      col: c,
+                      book: book,
+                      practice: practice,
+                      pageKey: pageKey,
+                      columnWidths: columnWidths,
+                    ),
                   ),
                 ),
             ],
@@ -111,14 +136,5 @@ class TableBlockView extends StatelessWidget {
         table,
       ],
     );
-  }
-
-  Widget _maybeTappable({required Widget child, VoidCallback? onTap}) =>
-      onTap == null ? child : InkWell(onTap: onTap, child: child);
-
-  void _jump(ReaderNavigation nav, String? printed) {
-    if (printed == null) return;
-    final index = nav.book.indexForPrintedPage(printed);
-    if (index != null) nav.goToIndex(index);
   }
 }

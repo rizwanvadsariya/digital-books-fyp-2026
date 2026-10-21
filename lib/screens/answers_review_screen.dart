@@ -8,13 +8,34 @@ import '../blocs/settings_cubit.dart';
 import '../data/exercise_lookup.dart';
 import '../l10n/l10n.dart';
 import '../theme/book_theme.dart';
-import '../utils/arabic_text.dart';
-import '../widgets/common/script_text.dart';
+import '../widgets/exercise/answer_row.dart';
 import 'reader_screen.dart';
 
 /// Every saved answer, grouped by page, with the exercise it belongs to.
 class AnswersReviewScreen extends StatelessWidget {
   const AnswersReviewScreen({super.key});
+
+  Future<void> _handleConfirmClear(BuildContext context) async {
+    final l = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.deleteAllAnswersQuestion),
+        content: Text(l.cannotBeUndone),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.delete)),
+        ],
+      ),
+    );
+    if (ok == true && context.mounted) {
+      context.read<AnswersCubit>().clearAll();
+    }
+  }
+
+  void _handleOpenPage(BuildContext context, int pageIndex) {
+    openReader(context, pageIndex);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +61,7 @@ class AnswersReviewScreen extends StatelessWidget {
             IconButton(
               tooltip: l.deleteAllAnswers,
               icon: const Icon(SolarIconsOutline.trashBinTrash),
-              onPressed: () => _confirmClear(context),
+              onPressed: () => _handleConfirmClear(context),
             ),
         ],
       ),
@@ -66,70 +87,16 @@ class AnswersReviewScreen extends StatelessWidget {
                         trailing: TextButton.icon(
                           icon: const Icon(SolarIconsOutline.export, size: 16),
                           label: Text(page.printedPage != null ? l.pageShort(page.printedPage!) : l.open),
-                          onPressed: () => openReader(context, page.index),
+                          onPressed: () => _handleOpenPage(context, page.index),
                         ),
                       ),
                       for (final (_, answer, info) in entries)
-                        _AnswerRow(answer: answer, info: info, strict: strict),
+                        AnswerRow(answer: answer, info: info, strict: strict),
                     ],
                   ),
                 );
               },
             ),
-    );
-  }
-
-  Future<void> _confirmClear(BuildContext context) async {
-    final l = context.l10n;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l.deleteAllAnswersQuestion),
-        content: Text(l.cannotBeUndone),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancel)),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.delete)),
-        ],
-      ),
-    );
-    if (ok == true && context.mounted) context.read<AnswersCubit>().clearAll();
-  }
-}
-
-class _AnswerRow extends StatelessWidget {
-  const _AnswerRow({required this.answer, required this.info, required this.strict});
-
-  final String answer;
-  final ExerciseInfo info;
-  final bool strict;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = BookTheme.of(context);
-    final key = info.answerKey;
-    final correct = key == null ? null : answerMatches(answer, key, strict: strict);
-    return ListTile(
-      dense: true,
-      title: ScriptText(info.prompt, size: 14, fallback: Script.arabic),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ScriptText(answer, size: 13.5, color: theme.accent),
-          if (correct == false)
-            Text.rich(TextSpan(children: [
-              TextSpan(text: context.l10n.correctAnswerLabel, style: TextStyle(fontSize: 12, color: theme.muted)),
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: ScriptText(key!, size: 12, color: theme.correct),
-              ),
-            ])),
-        ],
-      ),
-      trailing: switch (correct) {
-        true => Icon(SolarIconsBold.checkCircle, color: theme.correct),
-        false => Icon(SolarIconsBold.closeCircle, color: theme.incorrect),
-        null => null,
-      },
     );
   }
 }

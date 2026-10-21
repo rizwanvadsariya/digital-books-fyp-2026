@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:go_router/go_router.dart';
 
 import '../blocs/book_cubit.dart';
 import '../core/navigation/route_enums.dart';
 import '../l10n/l10n.dart';
 import '../theme/book_theme.dart';
-import 'home_shell.dart';
 
-/// Loads and parses the book JSON once, then hands over to [HomeShell].
+/// Loads and parses the book JSON once, then hands over to HomeShell.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
+
+  void _handleRetry(BuildContext context) {
+    context.read<BookCubit>().load();
+  }
+
+  void _handleNavigateHome(BuildContext context, BookState state) {
+    context.go(AppRoutes.home.path);
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BookCubit, BookState>(
       listenWhen: (a, b) => b.status == BookStatus.ready,
-      listener: (context, _) => context.go(AppRoutes.home.path),
+      listener: _handleNavigateHome,
       builder: (context, state) {
         return Scaffold(
           backgroundColor: const Color(0xFF3E0F0C),
@@ -38,7 +44,7 @@ class SplashScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () => context.read<BookCubit>().load(),
+                    onPressed: () => _handleRetry(context),
                     child: Text(context.l10n.retry),
                   ),
                 ] else

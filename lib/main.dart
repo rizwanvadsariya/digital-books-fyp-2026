@@ -16,7 +16,6 @@ import 'data/volumes.dart';
 import 'firebase_options.dart';
 import 'l10n/l10n.dart';
 import 'models/reader_settings.dart';
-import 'screens/splash_screen.dart';
 import 'theme/book_theme.dart';
 
 Future<void> main() async {
