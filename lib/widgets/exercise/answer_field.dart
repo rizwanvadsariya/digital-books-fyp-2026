@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../blocs/answers_cubit.dart';
 import '../../blocs/settings_cubit.dart';
@@ -177,7 +178,7 @@ class _AnswerFieldState extends State<AnswerField> {
               suffixIcon: active && kb.useNative
                   ? IconButton(
                       tooltip: l.useArabicKeyboard,
-                      icon: const Icon(Icons.translate, size: 18),
+                      icon: const Icon(SolarIconsOutline.translation, size: 18),
                       onPressed: () => _keyboard.setUseNative(false),
                     )
                   : null,
@@ -271,9 +272,9 @@ class _CheckButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
     final (icon, color) = switch (result) {
-      true => (Icons.check_circle, book.correct),
-      false => (Icons.cancel, book.incorrect),
-      null => (Icons.task_alt, book.muted),
+      true => (SolarIconsBold.checkCircle, book.correct),
+      false => (SolarIconsBold.closeCircle, book.incorrect),
+      null => (SolarIconsOutline.checkCircle, book.muted),
     };
     return SizedBox(
       width: 34,

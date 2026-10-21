@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../l10n/l10n.dart';
 import '../../theme/book_theme.dart';
@@ -68,14 +69,14 @@ class ArabicKeyboard extends StatelessWidget {
                             onTap: () => cubit.insert(state.language == KeyboardLanguage.urdu ? '۔' : '.'),
                           ),
                           _KeySpec(
-                            icon: Icons.backspace_outlined,
+                            icon: SolarIconsOutline.backspace,
                             flex: 1.5,
                             kind: _KeyKind.function,
                             onTap: cubit.backspace,
                             repeat: true,
                           ),
                           _KeySpec(
-                            icon: Icons.check,
+                            icon: SolarIconsOutline.checkSquare,
                             flex: 1.5,
                             kind: _KeyKind.primary,
                             onTap: cubit.dismiss,
@@ -135,12 +136,12 @@ class _Toolbar extends StatelessWidget {
           const Spacer(),
           IconButton(
             tooltip: l.useDeviceKeyboard,
-            icon: const Icon(Icons.keyboard_alt_outlined),
+            icon: const Icon(SolarIconsOutline.keyboard),
             onPressed: () => cubit.setUseNative(true),
           ),
           IconButton(
             tooltip: l.closeKeyboard,
-            icon: const Icon(Icons.keyboard_hide_outlined),
+            icon: const Icon(SolarIconsOutline.altArrowDown),
             onPressed: cubit.dismiss,
           ),
         ],

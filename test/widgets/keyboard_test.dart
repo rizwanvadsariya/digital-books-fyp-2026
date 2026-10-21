@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:fehm_e_quran/blocs/answers_cubit.dart';
 import 'package:fehm_e_quran/widgets/exercise/answer_field.dart';
 import 'package:fehm_e_quran/widgets/keyboard/arabic_keyboard.dart';
@@ -75,7 +76,7 @@ void main() {
     await tester.pump();
     expect(answers.answerFor('11_2_0'), 'كَت');
 
-    await tester.tap(find.byIcon(Icons.backspace_outlined));
+    await tester.tap(find.byIcon(SolarIconsOutline.backspace));
     await tester.pump();
     expect(answers.answerFor('11_2_0'), 'كَ');
 
@@ -87,7 +88,7 @@ void main() {
     expect(answers.answerFor('11_2_0'), 'كَے');
 
     // Done closes the keyboard; the answer is persisted.
-    await tester.tap(find.byIcon(Icons.check));
+    await tester.tap(find.byIcon(SolarIconsOutline.checkSquare));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(ArabicKeyboard), findsNothing);
     expect(store.readAnswers()['11_2_0'], 'كَے');
@@ -103,9 +104,9 @@ void main() {
         answers: answers,
       ),
     );
-    await tester.tap(find.byIcon(Icons.task_alt));
+    await tester.tap(find.byIcon(SolarIconsOutline.checkCircle));
     await tester.pump();
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(find.byIcon(SolarIconsBold.checkCircle), findsOneWidget);
   });
 }
 

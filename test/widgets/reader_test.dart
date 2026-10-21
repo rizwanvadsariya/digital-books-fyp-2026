@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:fehm_e_quran/blocs/answers_cubit.dart';
 import 'package:fehm_e_quran/blocs/book_cubit.dart';
 import 'package:fehm_e_quran/blocs/progress_cubit.dart';
@@ -66,7 +67,7 @@ void main() {
       expect(find.byType(ArabicKeyboard), findsOneWidget);
 
       await tester.tap(find.text('ب').last);
-      await tester.tap(find.byIcon(Icons.check));
+      await tester.tap(find.byIcon(SolarIconsOutline.checkSquare));
       await tester.pumpAndSettle();
       expect(store.readAnswers().values, contains('ب'));
     },
@@ -111,7 +112,7 @@ void main() {
 
   testWidgets('bookmark toggles from the app bar', (tester) async {
     final (store, progress) = await pumpReader(tester, 20);
-    await tester.tap(find.byIcon(Icons.bookmark_border));
+    await tester.tap(find.byIcon(SolarIconsOutline.bookmark));
     await tester.pump();
     expect(progress.state.bookmarks, {progress.state.lastPageIndex});
     expect(store.readBookmarks(), {progress.state.lastPageIndex});

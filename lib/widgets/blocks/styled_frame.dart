@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../models/block_style.dart';
 import '../../theme/book_theme.dart';
@@ -80,7 +81,7 @@ class StyledFrame extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsetsDirectional.only(top: 6, end: 8),
-                    child: Icon(Icons.error_outline, color: book.red, size: 22),
+                    child: Icon(SolarIconsOutline.dangerCircle, color: book.red, size: 22),
                   ),
                   Expanded(child: child),
                 ],

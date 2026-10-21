@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/settings_cubit.dart';
 import '../l10n/l10n.dart';
@@ -25,7 +26,7 @@ Future<void> showReadingSettings(BuildContext context) => showModalBottomSheet(
                 Align(
                   alignment: AlignmentDirectional.centerEnd,
                   child: TextButton.icon(
-                    icon: const Icon(Icons.settings_outlined),
+                    icon: const Icon(SolarIconsOutline.settings),
                     label: Text(sheetContext.l10n.allSettings),
                     onPressed: () {
                       Navigator.of(sheetContext).pop();
@@ -57,9 +58,9 @@ class ReadingControls extends StatelessWidget {
         const SizedBox(height: 8),
         SegmentedButton<ReadingTheme>(
           segments: [
-            ButtonSegment(value: ReadingTheme.paper, icon: const Icon(Icons.light_mode_outlined), label: Text(l.themePaper)),
-            ButtonSegment(value: ReadingTheme.sepia, icon: const Icon(Icons.coffee_outlined), label: Text(l.themeSepia)),
-            ButtonSegment(value: ReadingTheme.dark, icon: const Icon(Icons.dark_mode_outlined), label: Text(l.themeDark)),
+            ButtonSegment(value: ReadingTheme.paper, icon: const Icon(SolarIconsOutline.sun), label: Text(l.themePaper)),
+            ButtonSegment(value: ReadingTheme.sepia, icon: const Icon(SolarIconsOutline.cup), label: Text(l.themeSepia)),
+            ButtonSegment(value: ReadingTheme.dark, icon: const Icon(SolarIconsOutline.moon), label: Text(l.themeDark)),
           ],
           selected: {s.theme},
           onSelectionChanged: (v) => cubit.setTheme(v.first),
@@ -68,7 +69,7 @@ class ReadingControls extends StatelessWidget {
         Text(l.fontSize, style: text.titleSmall),
         Row(
           children: [
-            const Icon(Icons.text_decrease, size: 18),
+            const Icon(SolarIconsOutline.text, size: 16),
             Expanded(
               child: Slider(
                 value: s.fontScale,
@@ -79,7 +80,7 @@ class ReadingControls extends StatelessWidget {
                 onChanged: cubit.setFontScale,
               ),
             ),
-            const Icon(Icons.text_increase, size: 22),
+            const Icon(SolarIconsOutline.text, size: 24),
           ],
         ),
       ],
@@ -100,7 +101,7 @@ class ExerciseControls extends StatelessWidget {
       children: [
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          secondary: const Icon(Icons.visibility_off_outlined),
+          secondary: const Icon(SolarIconsOutline.eyeClosed),
           title: Text(l.practiceMode),
           subtitle: Text(l.practiceModeHint),
           value: s.practiceMode,
@@ -108,7 +109,7 @@ class ExerciseControls extends StatelessWidget {
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          secondary: const Icon(Icons.spellcheck),
+          secondary: const Icon(SolarIconsOutline.checkSquare),
           title: Text(l.strictMatching),
           subtitle: Text(l.strictMatchingHint),
           value: s.strictMatching,

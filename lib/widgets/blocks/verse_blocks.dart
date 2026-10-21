@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../blocs/answers_cubit.dart';
 import '../../blocs/settings_cubit.dart';
@@ -113,7 +114,7 @@ class RecitationButton extends StatelessWidget {
     return IconButton(
       tooltip: context.l10n.listenRecitation,
       visualDensity: VisualDensity.compact,
-      icon: Icon(Icons.play_circle_outline, color: book.accent),
+      icon: Icon(SolarIconsOutline.playCircle, color: book.accent),
       onPressed: () => ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(

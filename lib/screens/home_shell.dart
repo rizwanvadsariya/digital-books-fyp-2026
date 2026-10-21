@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/book_cubit.dart';
 import '../blocs/library_cubit.dart';
@@ -65,10 +66,12 @@ class _HomeShellState extends State<HomeShell> {
             key: ValueKey(volumeId),
             index: _tab,
             children: [
-              HomeScreen(onShowContents: () => setState(() {
-                _tab = 1;
-                _lastBackPress = null;
-              })),
+              HomeScreen(
+                onShowContents: () => setState(() {
+                  _tab = 1;
+                  _lastBackPress = null;
+                }),
+              ),
               TableOfContentsView(onOpen: open),
               BookmarksScreen(onOpen: open),
               SearchScreen(onOpen: open),
@@ -82,14 +85,26 @@ class _HomeShellState extends State<HomeShell> {
             _lastBackPress = null;
           }),
           destinations: [
-            NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: l.navHome),
-            NavigationDestination(icon: const Icon(Icons.toc_outlined), selectedIcon: const Icon(Icons.toc), label: l.navContents),
             NavigationDestination(
-              icon: const Icon(Icons.bookmarks_outlined),
-              selectedIcon: const Icon(Icons.bookmarks),
+              icon: const Icon(SolarIconsOutline.home),
+              selectedIcon: const Icon(SolarIconsBold.home),
+              label: l.navHome,
+            ),
+            NavigationDestination(
+              icon: const Icon(SolarIconsOutline.list_1),
+              selectedIcon: const Icon(SolarIconsBold.list_1),
+              label: l.navContents,
+            ),
+            NavigationDestination(
+              icon: const Icon(SolarIconsOutline.bookmark),
+              selectedIcon: const Icon(SolarIconsBold.bookmark),
               label: l.navBookmarks,
             ),
-            NavigationDestination(icon: const Icon(Icons.search), label: l.navSearch),
+            NavigationDestination(
+              icon: const Icon(SolarIconsOutline.magnifier),
+              selectedIcon: const Icon(SolarIconsBold.magnifier),
+              label: l.navSearch,
+            ),
           ],
         ),
       ),

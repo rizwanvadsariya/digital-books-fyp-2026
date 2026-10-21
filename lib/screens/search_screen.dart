@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/book_cubit.dart';
 import '../data/search_index.dart';
@@ -148,7 +149,7 @@ class _SearchScreenState extends State<SearchScreen> {
               EdgeInsets.symmetric(horizontal: 14),
             ),
             leading: Icon(
-              Icons.search,
+              SolarIconsOutline.magnifier,
               color: _focusNode.hasFocus ? bookTheme.accent : bookTheme.muted,
               size: 22,
             ),
@@ -168,7 +169,7 @@ class _SearchScreenState extends State<SearchScreen> {
               else if (_controller.text.isNotEmpty)
                 IconButton(
                   tooltip: l.clearSearch,
-                  icon: Icon(Icons.cancel, color: bookTheme.muted, size: 20),
+                  icon: Icon(SolarIconsBold.closeCircle, color: bookTheme.muted, size: 20),
                   onPressed: _clear,
                 ),
             ],
@@ -361,7 +362,7 @@ class _SearchPromptView extends StatelessWidget {
                 color: theme.boxTint,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.search_rounded, size: 42, color: theme.accent),
+              child: Icon(SolarIconsOutline.magnifier, size: 42, color: theme.accent),
             ),
             const SizedBox(height: 14),
             Text(
@@ -426,7 +427,7 @@ class _SearchNoResultsView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search_off_rounded, size: 48, color: theme.muted),
+            Icon(SolarIconsOutline.minimalisticMagnifier, size: 48, color: theme.muted),
             const SizedBox(height: 14),
             Text(
               l.searchNoResultsTitle,

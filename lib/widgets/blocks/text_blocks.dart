@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../models/block_style.dart';
 import '../../models/content_block.dart';
@@ -239,8 +240,8 @@ class NoteBlockView extends StatelessWidget {
                 padding: const EdgeInsetsDirectional.only(end: 8, top: 8),
                 child: Icon(
                   b.style.exclamation
-                      ? Icons.error_outline
-                      : Icons.lightbulb_outline,
+                      ? SolarIconsOutline.dangerCircle
+                      : SolarIconsOutline.lightbulb,
                   size: 20,
                   color: b.style.red ? book.red : book.accent,
                 ),
@@ -300,7 +301,7 @@ class NoteBlockView extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsetsDirectional.only(end: 6, top: 9),
-                    child: Icon(Icons.edit_note, size: 20, color: book.red),
+                    child: Icon(SolarIconsOutline.notes, size: 20, color: book.red),
                   ),
                   Expanded(
                     child: ScriptText(

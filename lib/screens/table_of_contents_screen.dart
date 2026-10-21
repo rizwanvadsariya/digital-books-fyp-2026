@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/book_cubit.dart';
 import '../l10n/l10n.dart';
@@ -364,7 +365,7 @@ class _PageTile extends StatelessWidget {
                 style: TextStyle(color: book.red),
               ),
             )
-          : Icon(Icons.description_outlined, color: book.muted, size: 20),
+          : Icon(SolarIconsOutline.documentText, color: book.muted, size: 20),
       title: ScriptText(title, size: 13.5),
       trailing: printedPage != null
           ? Text(

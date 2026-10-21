@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../../blocs/answers_cubit.dart';
 import '../../blocs/settings_cubit.dart';
@@ -205,7 +206,7 @@ class _SingularPluralCard extends StatelessWidget {
               side(item.singular, item.singularMeaning, context.l10n.singular),
               Padding(
                 padding: const EdgeInsets.only(top: 22),
-                child: Icon(Icons.arrow_back, size: 16, color: book.red),
+                child: Icon(SolarIconsOutline.arrowLeft, size: 16, color: book.red),
               ),
               side(item.plural, item.pluralMeaning, context.l10n.plural),
             ],

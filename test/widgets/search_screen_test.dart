@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:solar_icons/solar_icons.dart';
 import 'package:fehm_e_quran/data/book_repository.dart';
 import 'package:fehm_e_quran/data/volumes.dart';
 import 'package:fehm_e_quran/main.dart';
-import 'package:fehm_e_quran/screens/home_shell.dart';
 import 'package:fehm_e_quran/screens/search_screen.dart';
 
 import '../helpers.dart';
@@ -63,15 +63,15 @@ void main() {
 
     // Query is populated and results are shown
     expect(find.byType(ListTile), findsWidgets);
-    expect(find.byIcon(Icons.cancel), findsOneWidget);
+    expect(find.byIcon(SolarIconsBold.closeCircle), findsOneWidget);
 
     // Clear search using clear button
-    await tester.tap(find.byIcon(Icons.cancel));
+    await tester.tap(find.byIcon(SolarIconsBold.closeCircle));
     await tester.pumpAndSettle();
 
     // Prompt is shown again
     expect(find.text('Search the book'), findsOneWidget);
-    expect(find.byIcon(Icons.cancel), findsNothing);
+    expect(find.byIcon(SolarIconsBold.closeCircle), findsNothing);
 
     // Search for non-existent text
     final searchBar = find.byType(SearchBar);

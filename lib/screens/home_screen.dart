@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/answers_cubit.dart';
 import '../blocs/book_cubit.dart';
 import '../blocs/library_cubit.dart';
 import '../blocs/progress_cubit.dart';
+import '../core/navigation/route_enums.dart';
 import '../data/volumes.dart';
 import '../l10n/l10n.dart';
 import '../models/content_block.dart';
@@ -65,7 +68,7 @@ class HomeScreen extends StatelessWidget {
                         radius: 24,
                         backgroundColor: theme.red,
                         child: const Icon(
-                          Icons.auto_stories,
+                          SolarIconsBold.book2,
                           color: Colors.white,
                         ),
                       ),
@@ -113,27 +116,23 @@ class HomeScreen extends StatelessWidget {
             mainAxisSpacing: 8,
             children: [
               _ActionTile(
-                icon: Icons.menu_book_outlined,
+                icon: SolarIconsOutline.book2,
                 label: last == null ? l.startReading : l.readFromStart,
                 onTap: () => openReader(context, 0),
               ),
               _ActionTile(
-                icon: Icons.toc,
+                icon: SolarIconsOutline.list_1,
                 label: l.navContents,
                 onTap: onShowContents,
               ),
               _ActionTile(
-                icon: Icons.edit_note,
+                icon: SolarIconsOutline.notes,
                 label: l.myAnswers,
                 badge: answerCount,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const AnswersReviewScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoutes.answersReview.name),
               ),
               _ActionTile(
-                icon: Icons.tune,
+                icon: SolarIconsOutline.settings,
                 label: l.settings,
                 onTap: () => openSettings(context),
               ),
@@ -184,7 +183,9 @@ class _VolumeShelf extends StatelessWidget {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final icon = Icon(
-                        v == current ? Icons.menu_book : Icons.book_outlined,
+                        v == current
+                            ? SolarIconsBold.book2
+                            : SolarIconsOutline.book2,
                         color: v == current ? gold : null,
                       );
                       final narrow = constraints.maxWidth < 130;

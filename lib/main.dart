@@ -3,11 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'blocs/library_cubit.dart';
 import 'blocs/settings_cubit.dart';
 import 'blocs/volume_session.dart';
+import 'core/navigation/app_router.dart';
 import 'data/book_repository.dart';
 import 'data/local_store.dart';
 import 'data/volumes.dart';
@@ -51,12 +53,20 @@ void _registerFontLicenses() {
 }
 
 class FehmEQuranApp extends StatefulWidget {
-  const FehmEQuranApp({super.key, required this.store, this.repositoryFor});
+  const FehmEQuranApp({
+    super.key,
+    required this.store,
+    this.repositoryFor,
+    this.routerConfig,
+  });
 
   final LocalStore store;
 
   /// Overrides how a volume's JSON is loaded (tests pre-warm repositories).
   final BookRepository Function(BookVolume volume)? repositoryFor;
+
+  /// Custom router configuration (e.g. for testing).
+  final GoRouter? routerConfig;
 
   @override
   State<FehmEQuranApp> createState() => _FehmEQuranAppState();
@@ -65,6 +75,7 @@ class FehmEQuranApp extends StatefulWidget {
 class _FehmEQuranAppState extends State<FehmEQuranApp> {
   late final _library = LibraryCubit(widget.store);
   late final AppLifecycleListener _lifecycle;
+  late final _router = widget.routerConfig ?? createAppRouter();
 
   /// Opened volumes, kept so switching back is instant.
   final _sessions = <String, VolumeSession>{};
@@ -100,6 +111,9 @@ class _FehmEQuranAppState extends State<FehmEQuranApp> {
       s.close();
     }
     _library.close();
+    if (widget.routerConfig == null) {
+      _router.dispose();
+    }
     super.dispose();
   }
 
@@ -134,7 +148,8 @@ class _FehmEQuranAppState extends State<FehmEQuranApp> {
           a.theme != b.theme ||
           a.fontScale != b.fontScale ||
           a.language != b.language,
-      builder: (context, settings) => MaterialApp(
+      builder: (context, settings) => MaterialApp.router(
+        routerConfig: _router,
         onGenerateTitle: (context) => context.l10n.appTitle,
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(settings),
@@ -154,7 +169,6 @@ class _FehmEQuranAppState extends State<FehmEQuranApp> {
           data: withUiFont(Theme.of(context), urdu: context.isUrduUi),
           child: child!,
         ),
-        home: const SplashScreen(),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/answers_cubit.dart';
 import '../blocs/book_cubit.dart';
@@ -38,7 +39,7 @@ class AnswersReviewScreen extends StatelessWidget {
           if (answers.isNotEmpty)
             IconButton(
               tooltip: l.deleteAllAnswers,
-              icon: const Icon(Icons.delete_sweep_outlined),
+              icon: const Icon(SolarIconsOutline.trashBinTrash),
               onPressed: () => _confirmClear(context),
             ),
         ],
@@ -63,7 +64,7 @@ class AnswersReviewScreen extends StatelessWidget {
                         tileColor: theme.red.withValues(alpha: 0.08),
                         title: Text(pageLocation(l, page), style: const TextStyle(fontWeight: FontWeight.bold)),
                         trailing: TextButton.icon(
-                          icon: const Icon(Icons.open_in_new, size: 16),
+                          icon: const Icon(SolarIconsOutline.export, size: 16),
                           label: Text(page.printedPage != null ? l.pageShort(page.printedPage!) : l.open),
                           onPressed: () => openReader(context, page.index),
                         ),
@@ -125,8 +126,8 @@ class _AnswerRow extends StatelessWidget {
         ],
       ),
       trailing: switch (correct) {
-        true => Icon(Icons.check_circle, color: theme.correct),
-        false => Icon(Icons.cancel, color: theme.incorrect),
+        true => Icon(SolarIconsBold.checkCircle, color: theme.correct),
+        false => Icon(SolarIconsBold.closeCircle, color: theme.incorrect),
         null => null,
       },
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/book_cubit.dart';
 import '../blocs/progress_cubit.dart';
@@ -28,7 +29,7 @@ class BookmarksScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.bookmark_border, size: 56, color: theme.muted),
+              Icon(SolarIconsOutline.bookmark, size: 56, color: theme.muted),
               const SizedBox(height: 12),
               Text(l.noBookmarksTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
@@ -54,7 +55,7 @@ class BookmarksScreen extends StatelessWidget {
           background: Container(color: theme.red),
           onDismissed: (_) => context.read<ProgressCubit>().toggleBookmark(page.index),
           child: ListTile(
-            leading: Icon(Icons.bookmark, color: theme.red),
+            leading: Icon(SolarIconsBold.bookmark, color: theme.red),
             title: Text(pageLocation(l, page), style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: heading != null ? ScriptText(heading.text, size: 12, color: theme.muted) : null,
             trailing: Text(l.pageShort(page.printedPage ?? '${page.index + 1}')),

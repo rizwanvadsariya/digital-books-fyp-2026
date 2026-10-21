@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../blocs/book_cubit.dart';
+import '../core/navigation/route_enums.dart';
 import '../l10n/l10n.dart';
 import '../theme/book_theme.dart';
 import 'home_shell.dart';
@@ -14,13 +17,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<BookCubit, BookState>(
       listenWhen: (a, b) => b.status == BookStatus.ready,
-      listener: (context, _) => Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 500),
-          pageBuilder: (_, _, _) => const HomeShell(),
-          transitionsBuilder: (_, anim, _, child) => FadeTransition(opacity: anim, child: child),
-        ),
-      ),
+      listener: (context, _) => context.go(AppRoutes.home.path),
       builder: (context, state) {
         return Scaffold(
           backgroundColor: const Color(0xFF3E0F0C),

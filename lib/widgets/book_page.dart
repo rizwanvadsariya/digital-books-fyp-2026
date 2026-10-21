@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/progress_cubit.dart';
 import '../models/book.dart';
@@ -129,7 +130,7 @@ class _PageHeader extends StatelessWidget {
             PositionedDirectional(
               top: 0,
               start: 26,
-              child: Icon(Icons.bookmark, color: theme.red, size: 30),
+              child: Icon(SolarIconsBold.bookmark, color: theme.red, size: 30),
             ),
         ],
       ),

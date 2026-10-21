@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:solar_icons/solar_icons.dart';
 
 import '../blocs/answers_cubit.dart';
 import '../blocs/library_cubit.dart';
 import '../blocs/progress_cubit.dart';
 import '../blocs/settings_cubit.dart';
+import '../core/navigation/route_enums.dart';
 import '../l10n/l10n.dart';
 import '../models/reader_settings.dart';
 import '../theme/book_theme.dart';
@@ -12,7 +15,7 @@ import '../widgets/common/script_text.dart';
 import '../widgets/reading_settings_sheet.dart';
 
 Future<void> openSettings(BuildContext context) =>
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+    context.pushNamed(AppRoutes.settings.name);
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -25,22 +28,36 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
-          _Section(title: l.sectionLanguage, icon: Icons.translate, child: const _LanguagePicker()),
+          _Section(
+            title: l.sectionLanguage,
+            icon: SolarIconsOutline.global,
+            child: const _LanguagePicker(),
+          ),
           _Section(
             title: l.sectionReading,
-            icon: Icons.menu_book_outlined,
+            icon: SolarIconsOutline.book2,
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [ReadingControls(), _BookPreview()],
             ),
           ),
-          _Section(title: l.sectionExercises, icon: Icons.edit_note, child: const ExerciseControls()),
           _Section(
-            title: l.sectionDataForVolume(context.watch<LibraryCubit>().state.number),
-            icon: Icons.storage_outlined,
+            title: l.sectionExercises,
+            icon: SolarIconsOutline.notes,
+            child: const ExerciseControls(),
+          ),
+          _Section(
+            title: l.sectionDataForVolume(
+              context.watch<LibraryCubit>().state.number,
+            ),
+            icon: SolarIconsOutline.database,
             child: const _DataControls(),
           ),
-          _Section(title: l.sectionAbout, icon: Icons.info_outline, child: const _About()),
+          _Section(
+            title: l.sectionAbout,
+            icon: SolarIconsOutline.infoCircle,
+            child: const _About(),
+          ),
         ],
       ),
     );
@@ -48,7 +65,11 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.icon, required this.child});
+  const _Section({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
 
   final String title;
   final IconData icon;
@@ -68,7 +89,11 @@ class _Section extends StatelessWidget {
               children: [
                 Icon(icon, size: 20, color: scheme.primary),
                 const SizedBox(width: 8),
-                Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: scheme.primary)),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(color: scheme.primary),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -86,7 +111,9 @@ class _LanguagePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final current = context.select<SettingsCubit, AppLanguage>((c) => c.state.language);
+    final current = context.select<SettingsCubit, AppLanguage>(
+      (c) => c.state.language,
+    );
     // Each language is named in its own script so it can be found whatever
     // the current interface language is.
     final options = [
@@ -102,14 +129,21 @@ class _LanguagePicker extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.languageHint, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            l.languageHint,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           for (final (value, label, subtitle) in options)
             RadioListTile<AppLanguage>(
               contentPadding: EdgeInsets.zero,
               value: value,
               title: Text(
                 label,
-                style: TextStyle(fontFamily: value == AppLanguage.urdu ? urduFont : null),
+                style: TextStyle(
+                  fontFamily: value == AppLanguage.urdu ? urduFont : null,
+                ),
               ),
               subtitle: subtitle != null ? Text(subtitle) : null,
             ),
@@ -143,8 +177,16 @@ class _BookPreview extends StatelessWidget {
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ScriptText('وَاللَّهُ غَفُورٌ رَّحِيمٌ', size: 16, align: TextAlign.center),
-              ScriptText('اور اللہ بخشنے والا، رحم کرنے والا ہے', size: 14, align: TextAlign.center),
+              ScriptText(
+                'وَاللَّهُ غَفُورٌ رَّحِيمٌ',
+                size: 16,
+                align: TextAlign.center,
+              ),
+              ScriptText(
+                'اور اللہ بخشنے والا، رحم کرنے والا ہے',
+                size: 14,
+                align: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -159,30 +201,40 @@ class _DataControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final answers = context.select<AnswersCubit, int>((c) => c.state.answers.length);
-    final bookmarks = context.select<ProgressCubit, int>((c) => c.state.bookmarks.length);
+    final answers = context.select<AnswersCubit, int>(
+      (c) => c.state.answers.length,
+    );
+    final bookmarks = context.select<ProgressCubit, int>(
+      (c) => c.state.bookmarks.length,
+    );
     return Column(
       children: [
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.edit_note),
+          leading: const Icon(SolarIconsOutline.notes),
           title: Text(l.deleteAllAnswers),
           subtitle: Text(l.answersSaved(answers)),
           enabled: answers > 0,
           onTap: () async {
-            if (await _confirm(context, l.deleteAllAnswersQuestion, l.delete) && context.mounted) {
+            if (await _confirm(context, l.deleteAllAnswersQuestion, l.delete) &&
+                context.mounted) {
               context.read<AnswersCubit>().clearAll();
             }
           },
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.bookmark_remove_outlined),
+          leading: const Icon(SolarIconsOutline.bookmarkSquare),
           title: Text(l.removeAllBookmarks),
           subtitle: Text(l.bookmarksSaved(bookmarks)),
           enabled: bookmarks > 0,
           onTap: () async {
-            if (await _confirm(context, l.removeAllBookmarksQuestion, l.remove) && context.mounted) {
+            if (await _confirm(
+                  context,
+                  l.removeAllBookmarksQuestion,
+                  l.remove,
+                ) &&
+                context.mounted) {
               context.read<ProgressCubit>().clearBookmarks();
             }
           },
@@ -200,8 +252,14 @@ Future<bool> _confirm(BuildContext context, String title, String action) async {
       title: Text(title),
       content: Text(l.cannotBeUndone),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.cancel)),
-        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(action)),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(l.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(action),
+        ),
       ],
     ),
   );
@@ -216,17 +274,7 @@ class _About extends StatelessWidget {
     final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(l.aboutBook),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: TextButton.icon(
-            icon: const Icon(Icons.description_outlined),
-            label: Text(l.licenses),
-            onPressed: () => showLicensePage(context: context, applicationName: l.appTitle),
-          ),
-        ),
-      ],
+      children: [Text(l.aboutBook)],
     );
   }
 }
