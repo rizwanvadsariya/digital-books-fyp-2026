@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/answers_cubit.dart';
-import '../../blocs/settings_cubit.dart';
 import '../../models/content_block.dart';
 import '../../theme/book_theme.dart';
 import '../common/responsive_grid.dart';
 import 'singular_plural_card.dart';
 import 'vocab_card.dart';
 
-/// Grid of Arabic words with their Urdu meaning. Words without a printed
-/// meaning get an answer blank; in practice mode printed meanings are hidden
-/// and become self-check blanks too.
+/// Grid of Arabic words with their Urdu meaning. Every meaning is hidden
+/// behind a self-check blank, like the numbered exercises: words without a
+/// printed meaning stay an ungraded blank.
 class VocabListBlockView extends StatelessWidget {
   const VocabListBlockView({
     super.key,
@@ -27,9 +25,6 @@ class VocabListBlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
-    final practice = context.select<SettingsCubit, bool>(
-      (c) => c.state.practiceMode,
-    );
     return ResponsiveGrid(
       columns: block.columns,
       minCellWidth: 104,
@@ -41,7 +36,6 @@ class VocabListBlockView extends StatelessWidget {
             meaning: block.items[i].meaning,
             extra: block.items[i].note2,
             id: answerId(pdfPage, blockIndex, i),
-            practice: practice,
           ),
       ],
     );
@@ -64,9 +58,6 @@ class VocabPairListBlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
-    final practice = context.select<SettingsCubit, bool>(
-      (c) => c.state.practiceMode,
-    );
     return ResponsiveGrid(
       columns: block.columns,
       minCellWidth: 130,
@@ -79,7 +70,6 @@ class VocabPairListBlockView extends StatelessWidget {
               arabic: block.items[i].pair ?? '',
               meaning: block.items[i].note,
               id: answerId(pdfPage, blockIndex, i),
-              practice: practice,
               // Volumes 2–3 pairs can carry an inline Urdu gloss
               // ("یَعْبُدُ : وہ عبادت کرتا ہے"); give each part its font.
               mixedScript: true,

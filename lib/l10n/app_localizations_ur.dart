@@ -232,7 +232,27 @@ class AppLocalizationsUr extends AppLocalizations {
   String get hintIdentifyPart => 'مطلوبہ حصہ یہاں لکھیں';
 
   @override
+  String get hintNameTheSet => 'کاما لگا کر سب لکھیں';
+
+  @override
+  String get hintTapToHighlight => 'لفظ پر ٹیپ کر کے نمایاں کریں';
+
+  @override
   String get checkAnswer => 'جواب چیک کریں';
+
+  @override
+  String get markAsCorrect => 'درست نشان زد کریں';
+
+  @override
+  String get showModelAnswer => 'ماڈل جواب دیکھیں';
+
+  @override
+  String get resetExercise => 'دوبارہ شروع کریں';
+
+  @override
+  String scoreFraction(int correct, int total) {
+    return '$correct/$total';
+  }
 
   @override
   String get singular => 'واحد';

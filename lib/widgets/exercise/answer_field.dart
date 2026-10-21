@@ -23,6 +23,8 @@ class AnswerField extends StatefulWidget {
     this.answerKey,
     this.language = KeyboardLanguage.urdu,
     this.hint,
+    this.customCheck,
+    this.allowSelfMark = false,
   });
 
   final String id;
@@ -32,6 +34,15 @@ class AnswerField extends StatefulWidget {
   /// translations, Arabic when the answer is Quranic text.
   final KeyboardLanguage language;
   final String? hint;
+
+  /// Overrides the default lenient/strict [answerKey] comparison with an
+  /// exercise-specific grading rule. Takes the raw (un-normalized) input.
+  final bool Function(String input)? customCheck;
+
+  /// Phrase translations (exercise type 11) can be worded differently from
+  /// the book: when the automatic check comes back wrong, let the learner
+  /// mark their own answer correct after reading the model answer.
+  final bool allowSelfMark;
 
   @override
   State<AnswerField> createState() => _AnswerFieldState();
@@ -99,6 +110,10 @@ class _AnswerFieldState extends State<AnswerField> {
   }
 
   void _check() {
+    if (widget.customCheck != null) {
+      _answers.recordResult(widget.id, widget.customCheck!(_controller.text));
+      return;
+    }
     final key = widget.answerKey;
     if (key == null) return;
     _answers.check(
@@ -107,6 +122,8 @@ class _AnswerFieldState extends State<AnswerField> {
       strict: context.read<SettingsCubit>().state.strictMatching,
     );
   }
+
+  void _markCorrect() => _answers.recordResult(widget.id, true);
 
   void _handleSwitchToCustomKeyboard() {
     _keyboard.setUseNative(false);
@@ -201,7 +218,7 @@ class _AnswerFieldState extends State<AnswerField> {
               // arrangement (LayoutBuilder is costly across hundreds of
               // blanks): in narrow table cells, e.g. an 8-column table on a
               // phone, the button goes under the field instead of beside it.
-              if (widget.answerKey == null)
+              if (widget.answerKey == null && widget.customCheck == null)
                 field
               else
                 LayoutBuilder(
@@ -257,6 +274,19 @@ class _AnswerFieldState extends State<AnswerField> {
                       ],
                     ),
                     textDirection: TextDirection.rtl,
+                  ),
+                ),
+              if (result == false && widget.allowSelfMark)
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: _markCorrect,
+                    child: Text(l.markAsCorrect, style: uiTextStyle(context, size: 11, color: book.accent)),
                   ),
                 ),
             ],

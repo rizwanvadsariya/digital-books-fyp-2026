@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../blocs/answers_cubit.dart';
+import '../../data/exercise_lookup.dart';
 import '../../l10n/l10n.dart';
 import '../../models/content_block.dart';
 import '../../theme/book_theme.dart';
+import '../../utils/exercise_grading.dart';
 import '../common/script_text.dart';
 import '../exercise/answer_field.dart';
+import '../exercise/exercise_score_bar.dart';
+import '../exercise/reference_answer_grid.dart';
 import '../exercise/word_answer_grid.dart';
+import 'highlight_verse_exercise.dart';
 import 'verse_exercise.dart';
 
 /// A numbered exercise. Depending on its shape the learner:
@@ -65,19 +70,47 @@ class QuestionBlockView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          if (block.items.isNotEmpty)
-            WordAnswerGrid(words: block.items, pdfPage: pdfPage, blockIndex: blockIndex)
-          else if (block.verses.isNotEmpty)
-            for (var i = 0; i < block.verses.length; i++)
-              VerseExercise(
-                index: i,
-                verse: block.verses[i],
-                id: answerId(pdfPage, blockIndex, i),
-              )
+          ExerciseScoreBar(ids: gradableAnswerIds(block, pdfPage, blockIndex)),
+          if (block.verses.isNotEmpty)
+            for (var i = 0; i < block.verses.length; i++) _buildVerseItem(context, i)
+          else if (block.items.isNotEmpty)
+            block.exerciseType == 14
+                ? ReferenceAnswerGrid(items: block.items, answers: block.answers)
+                : WordAnswerGrid(
+                    words: block.items,
+                    pdfPage: pdfPage,
+                    blockIndex: blockIndex,
+                    answers: block.exerciseType == 3 ? null : block.answers,
+                    exerciseType: block.exerciseType,
+                  )
           else
             AnswerField(id: answerId(pdfPage, blockIndex, 0)),
         ],
       ),
     );
+  }
+
+  Widget _buildVerseItem(BuildContext context, int i) {
+    final id = answerId(pdfPage, blockIndex, i);
+    if (block.exerciseType == 7) {
+      return HighlightVerseExercise(
+        index: i,
+        verse: block.verses[i],
+        id: id,
+        expected: i < (block.answerWords?.length ?? 0) ? block.answerWords![i] : null,
+      );
+    }
+    if (block.exerciseType == 13) {
+      final expected = i < (block.answerWordSets?.length ?? 0) ? block.answerWordSets![i] : null;
+      return VerseExercise(
+        index: i,
+        verse: block.verses[i],
+        id: id,
+        answerKey: expected?.join('، '),
+        customCheck: expected == null ? null : (input) => gradeWordSet(input, expected),
+        hint: context.l10n.hintNameTheSet,
+      );
+    }
+    return VerseExercise(index: i, verse: block.verses[i], id: id);
   }
 }

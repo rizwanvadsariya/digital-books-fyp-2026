@@ -40,7 +40,8 @@ class AnswersState extends Equatable {
 }
 
 class AnswersCubit extends Cubit<AnswersState> {
-  AnswersCubit(this._store) : super(AnswersState(answers: _store.readAnswers()));
+  AnswersCubit(this._store)
+      : super(AnswersState(answers: _store.readAnswers(), checks: _store.readChecks()));
 
   final LocalStore _store;
   Timer? _saveTimer;
@@ -63,8 +64,30 @@ class AnswersCubit extends Cubit<AnswersState> {
   /// Grades the stored answer for [id] against the book's [key].
   bool check(String id, String key, {required bool strict}) {
     final ok = answerMatches(answerFor(id), key, strict: strict);
-    emit(AnswersState(answers: state.answers, checks: {...state.checks, id: ok}));
+    _setCheck(id, ok);
     return ok;
+  }
+
+  /// Records a result computed elsewhere (a custom grading rule, a
+  /// highlight/set exercise, or the learner self-marking a translation).
+  void recordResult(String id, bool ok) => _setCheck(id, ok);
+
+  void _setCheck(String id, bool ok) {
+    emit(AnswersState(answers: state.answers, checks: {...state.checks, id: ok}));
+    _scheduleSave();
+  }
+
+  /// Clears the answer and check result for a specific set of IDs, e.g. all
+  /// items of one exercise ("Reset" on that exercise).
+  void resetIds(Iterable<String> ids) {
+    final answers = {...state.answers};
+    final checks = {...state.checks};
+    for (final id in ids) {
+      answers.remove(id);
+      checks.remove(id);
+    }
+    emit(AnswersState(answers: answers, checks: checks));
+    _scheduleSave();
   }
 
   void clearAll() {
@@ -77,10 +100,14 @@ class AnswersCubit extends Cubit<AnswersState> {
     _saveTimer = Timer(const Duration(milliseconds: 400), flush);
   }
 
-  /// Writes answers to disk now (also called when the app is backgrounded).
+  /// Writes answers and check results to disk now (also called when the app
+  /// is backgrounded).
   Future<void> flush() {
     _saveTimer?.cancel();
-    return _store.writeAnswers(state.answers);
+    return Future.wait([
+      _store.writeAnswers(state.answers),
+      _store.writeChecks(state.checks),
+    ]);
   }
 
   @override

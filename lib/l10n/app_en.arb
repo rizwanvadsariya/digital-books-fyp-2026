@@ -147,7 +147,23 @@
   "hintWriteAnswer": "Write your answer",
   "hintWriteArabic": "Write in Arabic",
   "hintIdentifyPart": "Write the requested part",
+  "hintNameTheSet": "List them, separated by commas",
+  "hintTapToHighlight": "Tap the word(s) to highlight",
   "checkAnswer": "Check answer",
+  "markAsCorrect": "Mark as correct",
+  "showModelAnswer": "Show model answer",
+  "resetExercise": "Reset",
+  "scoreFraction": "{correct}/{total}",
+  "@scoreFraction": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "singular": "Singular",
   "plural": "Plural",
   "listenRecitation": "Listen to recitation",

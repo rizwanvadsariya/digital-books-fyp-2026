@@ -119,16 +119,7 @@ sealed class ContentBlock {
         case 'table':
           return TableBlock.fromJson(json, style: style, highlight: highlight);
         case 'question':
-          return QuestionBlock(
-            type: type,
-            style: style,
-            highlight: highlight,
-            number: _int(json['number']),
-            text: _str(json['text']) ?? '',
-            items: _strList(json['items']),
-            verses: _strList(json['verses']),
-            marks: _int(json['marks']),
-          );
+          return QuestionBlock.fromJson(json, type: type, style: style, highlight: highlight);
         case 'quran_verse':
           return QuranVerseBlock(
             type: type,
@@ -391,7 +382,53 @@ class QuestionBlock extends ContentBlock {
     this.items = const [],
     this.verses = const [],
     this.marks,
+    this.exerciseType,
+    this.gradable,
+    this.answers,
+    this.answerWords,
+    this.answerWordSets,
   });
+
+  factory QuestionBlock.fromJson(
+    Map<String, dynamic> json, {
+    required String type,
+    required BlockStyle style,
+    required bool highlight,
+  }) {
+    // `answer_words` is either one expected span per verse (exercise 7, a
+    // plain string, "، "-joined when several spans are required) or one set
+    // of required words per verse (exercise 13, a list) — never mixed within
+    // a block.
+    final rawAnswerWords = json['answer_words'];
+    List<String?>? answerWords;
+    List<List<String>?>? answerWordSets;
+    if (rawAnswerWords is List) {
+      if (rawAnswerWords.any((e) => e is List)) {
+        answerWordSets = [
+          for (final e in rawAnswerWords) e is List ? [for (final w in e) w.toString()] : null,
+        ];
+      } else {
+        answerWords = [for (final e in rawAnswerWords) _str(e)];
+      }
+    }
+    final rawAnswers = json['answers'];
+    final answers = rawAnswers is List ? [for (final e in rawAnswers) _str(e)] : null;
+    return QuestionBlock(
+      type: type,
+      style: style,
+      highlight: highlight,
+      number: _int(json['number']),
+      text: _str(json['text']) ?? '',
+      items: _strList(json['items']),
+      verses: _strList(json['verses']),
+      marks: _int(json['marks']),
+      exerciseType: _int(json['exercise_type']),
+      gradable: json['gradable'] is bool ? json['gradable'] as bool : null,
+      answers: answers,
+      answerWords: answerWords,
+      answerWordSets: answerWordSets,
+    );
+  }
 
   final int? number;
   final String text;
@@ -404,6 +441,34 @@ class QuestionBlock extends ContentBlock {
 
   /// Quranic snippets in which the student identifies/highlights a part.
   final List<String> verses;
+
+  /// One of the 14 graded exercise shapes (see the data model notes), or
+  /// `null` for a question with no answer key at all.
+  final int? exerciseType;
+
+  /// Whether this exercise has a right/wrong answer. `false` for open-ended
+  /// discussion (type 3) and reference-only explanations (type 14).
+  final bool? gradable;
+
+  /// Answer key parallel to [items]. A `null` entry means no key is
+  /// available for that item (show it ungraded, never mark it wrong).
+  final List<String?>? answers;
+
+  /// Exercise 7 (highlight): the expected span parallel to [verses], one or
+  /// more words joined by "، " when several words must be selected.
+  final List<String?>? answerWords;
+
+  /// Exercise 13 (oath): the expected set of words parallel to [verses].
+  final List<List<String>?>? answerWordSets;
+
+  /// Whether item/verse [i] has an answer key to grade against.
+  bool hasKeyAt(int i) {
+    if (gradable == false) return false;
+    if (answers != null) return i < answers!.length && answers![i] != null;
+    if (answerWords != null) return i < answerWords!.length && answerWords![i] != null;
+    if (answerWordSets != null) return i < answerWordSets!.length && answerWordSets![i] != null;
+    return false;
+  }
 }
 
 class QuranVerseBlock extends ContentBlock {

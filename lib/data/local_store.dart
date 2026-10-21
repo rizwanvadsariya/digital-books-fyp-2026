@@ -19,6 +19,7 @@ class LocalStore {
   LocalStore forVolume(String namespace) => LocalStore(_prefs, namespace: namespace);
 
   String get _answersKey => '${namespace}answers.v1';
+  String get _checksKey => '${namespace}checks.v1';
   String get _lastPageKey => '${namespace}progress.lastPage';
   String get _bookmarksKey => '${namespace}progress.bookmarks';
   static const _settingsKey = 'settings.v1';
@@ -41,6 +42,20 @@ class LocalStore {
 
   Future<void> writeAnswers(Map<String, String> answers) =>
       _prefs.setString(_answersKey, jsonEncode(answers));
+
+  Map<String, bool> readChecks() {
+    final raw = _prefs.getString(_checksKey);
+    if (raw == null) return {};
+    try {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      return decoded.map((k, v) => MapEntry(k, v == true));
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<void> writeChecks(Map<String, bool> checks) =>
+      _prefs.setString(_checksKey, jsonEncode(checks));
 
   int? readLastPage() => _prefs.getInt(_lastPageKey);
 

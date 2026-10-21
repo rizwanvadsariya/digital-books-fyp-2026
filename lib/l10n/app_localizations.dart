@@ -458,11 +458,47 @@ abstract class AppLocalizations {
   /// **'Write the requested part'**
   String get hintIdentifyPart;
 
+  /// No description provided for @hintNameTheSet.
+  ///
+  /// In en, this message translates to:
+  /// **'List them, separated by commas'**
+  String get hintNameTheSet;
+
+  /// No description provided for @hintTapToHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the word(s) to highlight'**
+  String get hintTapToHighlight;
+
   /// No description provided for @checkAnswer.
   ///
   /// In en, this message translates to:
   /// **'Check answer'**
   String get checkAnswer;
+
+  /// No description provided for @markAsCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as correct'**
+  String get markAsCorrect;
+
+  /// No description provided for @showModelAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show model answer'**
+  String get showModelAnswer;
+
+  /// No description provided for @resetExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetExercise;
+
+  /// No description provided for @scoreFraction.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct}/{total}'**
+  String scoreFraction(int correct, int total);
 
   /// No description provided for @singular.
   ///

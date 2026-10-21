@@ -12,7 +12,6 @@ class VocabCard extends StatelessWidget {
     required this.arabic,
     required this.meaning,
     required this.id,
-    required this.practice,
     this.arabicColor,
     this.extra,
     this.mixedScript = false,
@@ -25,13 +24,11 @@ class VocabCard extends StatelessWidget {
   final String? meaning;
   final String? extra;
   final String id;
-  final bool practice;
   final Color? arabicColor;
 
   @override
   Widget build(BuildContext context) {
     final book = BookTheme.of(context);
-    final showMeaning = meaning != null && !practice;
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 2, 8, 6),
       decoration: BoxDecoration(
@@ -51,20 +48,11 @@ class VocabCard extends StatelessWidget {
             forceScript: mixedScript ? null : Script.arabic,
             fallback: Script.arabic,
           ),
-          if (showMeaning)
-            ScriptText(
-              meaning!,
-              size: 12.5,
-              align: TextAlign.center,
-              color: book.muted,
-              forceScript: Script.urdu,
-            )
-          else
-            AnswerField(
-              id: id,
-              answerKey: meaning,
-              hint: context.l10n.hintMeaning,
-            ),
+          AnswerField(
+            id: id,
+            answerKey: meaning,
+            hint: context.l10n.hintMeaning,
+          ),
           if (extra != null)
             ScriptText(
               extra!,

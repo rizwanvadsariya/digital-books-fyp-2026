@@ -233,7 +233,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hintIdentifyPart => 'Write the requested part';
 
   @override
+  String get hintNameTheSet => 'List them, separated by commas';
+
+  @override
+  String get hintTapToHighlight => 'Tap the word(s) to highlight';
+
+  @override
   String get checkAnswer => 'Check answer';
+
+  @override
+  String get markAsCorrect => 'Mark as correct';
+
+  @override
+  String get showModelAnswer => 'Show model answer';
+
+  @override
+  String get resetExercise => 'Reset';
+
+  @override
+  String scoreFraction(int correct, int total) {
+    return '$correct/$total';
+  }
 
   @override
   String get singular => 'Singular';

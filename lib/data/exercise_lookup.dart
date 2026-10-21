@@ -17,6 +17,16 @@ class ExerciseInfo {
   final String? answerKey;
 }
 
+/// IDs of a question block's gradable items/verses (those with an answer
+/// key), for a per-exercise score and "Reset" ([AnswersCubit.resetIds]).
+List<String> gradableAnswerIds(QuestionBlock block, int pdfPage, int blockIndex) {
+  final count = block.verses.isNotEmpty ? block.verses.length : block.items.length;
+  return [
+    for (var i = 0; i < count; i++)
+      if (block.hasKeyAt(i)) answerId(pdfPage, blockIndex, i),
+  ];
+}
+
 /// Resolves a saved answer ID back to what it answers.
 ExerciseInfo? describeAnswer(Book book, String id) {
   final parts = AnswerIdParts.parse(id);
@@ -33,7 +43,10 @@ ExerciseInfo? describeAnswer(Book book, String id) {
   switch (block) {
     case QuestionBlock b:
       final prompt = at(b.items, item) ?? at(b.verses, item) ?? b.text;
-      return ExerciseInfo(page: page, prompt: prompt, question: b.text);
+      final key = at(b.answers ?? const [], item) ??
+          at(b.answerWords ?? const [], item) ??
+          at(b.answerWordSets ?? const [], item)?.join('، ');
+      return ExerciseInfo(page: page, prompt: prompt, question: b.text, answerKey: key);
     case TextBlock b:
       return ExerciseInfo(page: page, prompt: at(b.items, item) ?? b.text, question: b.text);
     case VocabListBlock b:

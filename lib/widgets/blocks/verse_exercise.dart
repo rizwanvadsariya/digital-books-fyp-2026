@@ -13,11 +13,17 @@ class VerseExercise extends StatelessWidget {
     required this.index,
     required this.verse,
     required this.id,
+    this.answerKey,
+    this.customCheck,
+    this.hint,
   });
 
   final int index;
   final String verse;
   final String id;
+  final String? answerKey;
+  final bool Function(String input)? customCheck;
+  final String? hint;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +48,13 @@ class VerseExercise extends StatelessWidget {
               Expanded(child: ScriptText(verse, size: 16, forceScript: Script.arabic)),
             ],
           ),
-          AnswerField(id: id, language: KeyboardLanguage.arabic, hint: context.l10n.hintIdentifyPart),
+          AnswerField(
+            id: id,
+            language: KeyboardLanguage.arabic,
+            hint: hint ?? context.l10n.hintIdentifyPart,
+            answerKey: answerKey,
+            customCheck: customCheck,
+          ),
         ],
       ),
     );
