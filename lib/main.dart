@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,23 +31,8 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('Firebase initialization skipped or failed: $e');
   }
-  _registerFontLicenses();
   final store = LocalStore(await SharedPreferences.getInstance());
   runApp(FehmEQuranApp(store: store));
-}
-
-void _registerFontLicenses() {
-  LicenseRegistry.addLicense(() async* {
-    for (final (font, file) in [
-      ('Amiri', 'OFL-Amiri.txt'),
-      ('Noto Nastaliq Urdu', 'OFL-NotoNastaliqUrdu.txt'),
-      ('Noto Sans Math', 'OFL-NotoSansMath.txt'),
-    ]) {
-      yield LicenseEntryWithLineBreaks([
-        font,
-      ], await rootBundle.loadString('assets/fonts/$file'));
-    }
-  });
 }
 
 class FehmEQuranApp extends StatefulWidget {
